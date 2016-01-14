@@ -18,7 +18,7 @@ Add the package to your `composer.json`.
 
 ```
 "require-dev": {
-    "gecko-packages/gecko-memcache-mock" : "1.0"
+    "gecko-packages/gecko-memcache-mock" : "0.1"
 }
 ```
 
