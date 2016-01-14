@@ -70,8 +70,6 @@ final class MemcachedMockBehaviourTest extends PHPUnit_Framework_TestCase
         $debugLog = $testLogger->getDebugLog();
         $this->assertInternalType('array', $debugLog);
         $this->assertCount(7, $debugLog);
-
-        var_dump($debugLog);
     }
 
     public function testAppend()
