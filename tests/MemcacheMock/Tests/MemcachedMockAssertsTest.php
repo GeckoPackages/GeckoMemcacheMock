@@ -9,6 +9,7 @@
  * with this source code in the file LICENSE.
  */
 
+use GeckoPackages\MemcacheMock\MemcachedLogger;
 use GeckoPackages\MemcacheMock\MemcachedMock;
 
 /**
@@ -32,6 +33,9 @@ final class MemcachedMockAssertsTest extends PHPUnit_Framework_TestCase
     {
         $mock = new MemcachedMock();
         $mock->setThrowExceptionsOnFailure(false);
+        $logger = new TestLogger();
+        $mock->setLogger(new MemcachedLogger($logger));
+
         $mockReflection = new \ReflectionClass($mock);
         $method = $mockReflection->getMethod($methodName);
         $this->assertInstanceOf('\ReflectionMethod', $method, sprintf('Failed to find method "%s".', $methodName));
@@ -40,10 +44,10 @@ final class MemcachedMockAssertsTest extends PHPUnit_Framework_TestCase
         $method->setAccessible(true);
         $this->assertSame($expected, $method->invokeArgs($mock, $args), sprintf('Expected return value mismatch for "%s".', $methodName));
         if (null !== $message) {
-            $failures = $mock->getAssertFailures();
+            $failures = $logger->getErrorLog();
             $this->assertInternalType('array', $failures);
-            $this->assertCount(1, $failures, sprintf("Expected 1 assert fail, got:\n -%s", implode("\n -", $failures)));
-            $this->assertSame($message, $failures[0], 'Assert message not as expected.');
+            $this->assertCount(1, $failures, 'Expected 1 assert failure.');
+            $this->assertSame($message, $failures[0][0], 'Assert message not as expected.');
         }
     }
 
@@ -200,11 +204,9 @@ final class MemcachedMockAssertsTest extends PHPUnit_Framework_TestCase
     public function testMultipleAssertFailures()
     {
         $mock = new MemcachedMock();
-        $mock->setThrowExceptionsOnFailure(true);
-        $assertFailures = $mock->getAssertFailures();
-        $this->assertInternalType('array', $assertFailures);
-        $this->assertCount(0, $assertFailures);
         $mock->setThrowExceptionsOnFailure(false);
+        $logger = new TestLogger();
+        $mock->setLogger(new MemcachedLogger($logger));
 
         $mockReflection = new \ReflectionClass($mock);
         $method = $mockReflection->getMethod('assertConnected');
@@ -216,8 +218,9 @@ final class MemcachedMockAssertsTest extends PHPUnit_Framework_TestCase
         $this->assertFalse($method->invokeArgs($mock, array(array())));
 
         $mock->setThrowExceptionsOnFailure(true);
-        $assertFailures = $mock->getAssertFailures();
-        $this->assertInternalType('array', $assertFailures);
-        $this->assertCount(2, $assertFailures);
+
+        $errorLog = $mock->getLogger()->getLogger()->getErrorLog();
+        $this->assertInternalType('array', $errorLog);
+        $this->assertCount(2, $errorLog);
     }
 }

@@ -21,6 +21,23 @@ use Psr\Log\LoggerInterface;
 final class TestLogger implements LoggerInterface
 {
     private $debugLog = array();
+    private $errorLog = array();
+
+    /**
+     * @return array<array<string, array<string, mixed>>>
+     */
+    public function getDebugLog()
+    {
+        return $this->debugLog;
+    }
+
+    /**
+     * @return array<array<string, array<string, mixed>>>
+     */
+    public function getErrorLog()
+    {
+        return $this->errorLog;
+    }
 
     /**
      * {@inheritdoc}
@@ -31,11 +48,11 @@ final class TestLogger implements LoggerInterface
     }
 
     /**
-     * @return array<array<string, array<string, mixed>>>
+     * {@inheritdoc}
      */
-    public function getDebugLog()
+    public function error($message, array $context = array())
     {
-        return $this->debugLog;
+        $this->errorLog[] = array($message, $context);
     }
 
     /**
@@ -56,13 +73,6 @@ final class TestLogger implements LoggerInterface
      * {@inheritdoc}
      */
     public function critical($message, array $context = array())
-    {
-    }
-
-    /**
-     * {@inheritdoc}
-     */
-    public function error($message, array $context = array())
     {
     }
 

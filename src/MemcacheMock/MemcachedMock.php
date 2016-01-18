@@ -45,7 +45,6 @@ class MemcachedMock
     private $delayedFlush = -1; // UNIX timestamp
     private $deleteQueue = array();
     private $throwExceptionOnFailure = false;
-    private $assertFailures = array();
 
     /**
      * @var MemcachedLogger|null
@@ -87,16 +86,6 @@ class MemcachedMock
     public function setLogger(MemcachedLogger $logger = null)
     {
         $this->logger = $logger;
-    }
-
-    /**
-     * @note Not available on Memcached class.
-     *
-     * @return string[]
-     */
-    public function getAssertFailures()
-    {
-        return $this->assertFailures;
     }
 
     /**
@@ -1536,12 +1525,18 @@ class MemcachedMock
      * @param string|null $message
      *
      * @return false
+     *
+     * @throws MemcachedMockAssertException (when configured)
      */
     private function failedAssert($assert, $message = null)
     {
         $stack = debug_backtrace(false);
         $message = sprintf('%s failed %s%s', $stack[1]['function'], $assert, null === $message ? '' : ' '.$message);
-        $this->assertFailures[] = $message;
+
+        if (null !== $this->logger && null !== $logger = $this->logger->getLogger()) {
+            $logger->error($message);
+        }
+
         if ($this->throwExceptionOnFailure) {
             throw new MemcachedMockAssertException($message);
         }

@@ -18,7 +18,7 @@ Add the package to your `composer.json`.
 
 ```
 "require-dev": {
-    "gecko-packages/gecko-memcache-mock" : "0.1"
+    "gecko-packages/gecko-memcache-mock" : "1.0"
 }
 ```
 
@@ -150,7 +150,6 @@ These methods are _not_ available:
 * touchByKey
 
 The mock has the following additional methods that are not on the Memcached class:
-* getAssertFailures
 * getExpiry
 * getLogger
 * setLogger
