@@ -9,7 +9,7 @@ The mock is written in PHP as class and is therefor not persistent beyond the ex
 
 ### Requirements
 
-PHP 5.3.3 for the Symfony Stopwatch Component
+PHP 5.4 for the Callable type hint.
 
 ### Install
 
