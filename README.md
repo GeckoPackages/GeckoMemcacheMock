@@ -2,7 +2,7 @@
 
 # Memcache mock
 
-Memcache mock (http://memcached.org/) which mimics the Memcached package (http://php.net/manual/en/book.memcached.php) (API) as much as possible.
+Memcache mock (http://memcached.org/) which mimics the [Memcached package](http://php.net/manual/en/book.memcached.php) (API) as much as possible.
 Its use is for test purposes for software that support interaction with Memcache using the Memcached package.
 It provides a way to perform tests without having an instance of Memcache running or even having the Memcached package available.
 The mock is written in PHP as class and is therefor not persistent beyond the execution of the script that creates it.
@@ -13,7 +13,7 @@ PHP 5.4 for the Callable type hint.
 
 ### Install
 
-The package can be installed using Composer (https://getcomposer.org/).
+The package can be installed using [Composer](https://getcomposer.org/).
 Add the package to your `composer.json`.
 
 ```
@@ -21,6 +21,8 @@ Add the package to your `composer.json`.
     "gecko-packages/gecko-memcache-mock" : "1.0"
 }
 ```
+
+Please note we hint `-dev` here because typically you only need a mock during development.
 
 # Usage
 
