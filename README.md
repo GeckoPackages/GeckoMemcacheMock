@@ -24,7 +24,7 @@ Add the package to your `composer.json`.
 
 Please note we hint `-dev` here because typically you only need a mock during development.
 
-# Usage
+## Usage
 
 ## Basics
 

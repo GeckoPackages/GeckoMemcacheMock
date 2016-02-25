@@ -20,7 +20,7 @@
  */
 final class MemcachedMockCompletenessTest extends PHPUnit_Framework_TestCase
 {
-    public static function testMemcachedMockCompleteness()
+    public function testMemcachedMockCompleteness()
     {
         $mockReflection = new ReflectionClass('GeckoPackages\MemcacheMock\MemcachedMock');
         $mockMethodsFiltered = array();
@@ -32,6 +32,21 @@ final class MemcachedMockCompletenessTest extends PHPUnit_Framework_TestCase
 
         $reflection = new ReflectionClass('Memcached');
         self::assertMethodList($reflection->getMethods(), $mockMethodsFiltered);
+    }
+
+    /**
+     * {@inheritdoc}
+     */
+    protected function onNotSuccessfulTest(Exception $e)
+    {
+        ob_start();
+        echo "Memcached extension info:\n";
+        $ext = new ReflectionExtension('memcached');
+        $ext->info();
+        $info = ob_get_contents();
+        ob_end_clean();
+
+        parent::onNotSuccessfulTest(new \Exception($info, 0, $e));
     }
 
     /**
