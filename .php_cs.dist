@@ -16,9 +16,11 @@ return Symfony\CS\Config\Config::create()
     ->level(Symfony\CS\FixerInterface::SYMFONY_LEVEL)
     // and extra fixers:
     ->fixers(array(
+        'ereg_to_preg',
         'header_comment',
         'long_array_syntax',
         'newline_after_open_tag',
+        'no_useless_return',
         'ordered_use',
         'php_unit_construct',
         'php_unit_strict',

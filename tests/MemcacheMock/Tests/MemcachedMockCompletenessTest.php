@@ -18,7 +18,7 @@
  *
  * @requires extension memcached
  */
-final class MemcachedMockCompletenessTest extends PHPUnit_Framework_TestCase
+final class MemcachedMockCompletenessTest extends \PHPUnit_Framework_TestCase
 {
     public function testMemcachedMockCompleteness()
     {
@@ -40,7 +40,7 @@ final class MemcachedMockCompletenessTest extends PHPUnit_Framework_TestCase
     protected function onNotSuccessfulTest(Exception $e)
     {
         ob_start();
-        echo "Memcached extension info:\n";
+        echo sprintf("Memcached extension (%s) info:\n", phpversion('memcached'));
         $ext = new ReflectionExtension('memcached');
         $ext->info();
         $info = ob_get_contents();

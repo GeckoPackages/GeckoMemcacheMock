@@ -17,7 +17,7 @@ use Symfony\Component\Stopwatch\Stopwatch;
  *
  * @internal
  */
-final class MemcachedLoggerTest extends PHPUnit_Framework_TestCase
+final class MemcachedLoggerTest extends \PHPUnit_Framework_TestCase
 {
     public function testLogger()
     {
