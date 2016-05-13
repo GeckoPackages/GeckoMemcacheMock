@@ -6,7 +6,7 @@
   "license": "MIT",
   "keywords" : ["Memcache", "Memcached", "Mock", "Test"],
   "require": {
-    "php": ">=5.4",
+    "php": "^5.4 || ^7.0",
     "psr/log": "~1.0",
     "symfony/stopwatch" : "~2.5|~3.0"
   },
