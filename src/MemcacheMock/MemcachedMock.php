@@ -163,6 +163,30 @@ class MemcachedMock
         return true;
     }
 
+    /**
+     * @return string
+     */
+    public function getPrefix()
+    {
+        return array_key_exists(-1002, $this->options) ? $this->options[-1002] : false; // \Memcached::OPT_PREFIX_KEY
+    }
+
+    /**
+     * @param $prefix string
+     */
+    public function setPrefix($prefix)
+    {
+        if (!is_string($prefix)) {
+            throw new \InvalidArgumentException(sprintf('Prefix must be a string, got "%s".', is_object($prefix) ? get_class($prefix) : gettype($prefix)));
+        }
+
+        if (strlen($prefix) > 128) {
+            throw new \InvalidArgumentException(sprintf('Max. length of prefix is 128, got "%d".', strlen($prefix)));
+        }
+
+        $this->options[-1002] = $prefix;
+    }
+
     public function getServerList()
     {
         if (null !== $this->logger) {
@@ -1207,11 +1231,6 @@ class MemcachedMock
         }
 
         return $filteredKeys;
-    }
-
-    private function getPrefix()
-    {
-        return array_key_exists(-1002, $this->options) ? $this->options[-1002] : false; // \Memcached::OPT_PREFIX_KEY
     }
 
     private function isInCache($key)

@@ -21,9 +21,39 @@ use GeckoPackages\MemcacheMock\MemcachedMock;
  */
 final class MemcachedMockBehaviourTest extends PHPUnit_Framework_TestCase
 {
+    public function testGetSetPrefix()
+    {
+        $prefix = 'abc';
+        $mock = new MemcachedMock();
+        $this->assertSame('', $mock->getOption(-1002));
+        $mock->setPrefix($prefix);
+        $this->assertSame($prefix, $mock->getPrefix());
+        $this->assertSame($prefix, $mock->getOption(-1002));
+    }
+
+    /**
+     * @expectedException \InvalidArgumentException
+     * @expectedExceptionMessageRegExp #^Prefix must be a string, got "integer".$#
+     */
+    public function testSetInvalidPrefixType()
+    {
+        $mock = new MemcachedMock();
+        $mock->setPrefix(123);
+    }
+
+    /**
+     * @expectedException \InvalidArgumentException
+     * @expectedExceptionMessageRegExp #^Max. length of prefix is 128, got "132".$#
+     */
+    public function testSetInvalidPrefix()
+    {
+        $mock = new MemcachedMock();
+        $mock->setPrefix('abcabcabcabcabcabcabcabcabcabcabcabcabcabcabcabcaabcabcabcabcabcabcabcabcabcabcabcabcabcabcabcabcaabcabcababcabcabcabcabcabcabcassss');
+    }
+
     /**
      * @expectedException GeckoPackages\MemcacheMock\MemcachedMockAssertException
-     * @expectedExceptionMessage assertConnected failed is connected.
+     * @expectedExceptionMessageRegExp #^assertConnected failed is connected.$#
      */
     public function testAssertFailToException()
     {
@@ -444,7 +474,7 @@ final class MemcachedMockBehaviourTest extends PHPUnit_Framework_TestCase
 
     /**
      * @expectedException \UnexpectedValueException
-     * @expectedExceptionMessage assertOption failed option is known, got "667".
+     * @expectedExceptionMessageRegExp #^assertOption failed option is known, got "667".$#
      */
     public function testOptionException()
     {
@@ -710,7 +740,7 @@ final class MemcachedMockBehaviourTest extends PHPUnit_Framework_TestCase
 
     /**
      * @expectedException \UnexpectedValueException
-     * @expectedExceptionMessage Unknown result failed code "555", supply an error message.
+     * @expectedExceptionMessageRegExp #^Unknown result failed code "555", supply an error message.$#
      */
     public function testMissingResultErrorMessage()
     {

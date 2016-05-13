@@ -155,6 +155,8 @@ The mock has the following additional methods that are not on the Memcached clas
 * getExpiry
 * getLogger
 * setLogger
+* getPrefix
+* setPrefix
 * setThrowExceptionsOnFailure
 
 ### License
