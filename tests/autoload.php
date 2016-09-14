@@ -10,4 +10,4 @@
  */
 
 require_once __DIR__.'/../vendor/autoload.php';
-require_once __DIR__ . '/MemcacheMock/Tests/TestLogger.php';
+require_once __DIR__.'/MemcacheMock/Tests/TestLogger.php';

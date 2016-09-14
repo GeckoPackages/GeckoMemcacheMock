@@ -74,6 +74,6 @@ class MemcachedLogger
      */
     private function log($message, array $params = null)
     {
-        $this->logger->debug($message, null === $params ? array() : $params);
+        $this->logger->debug($message, null === $params ? [] : $params);
     }
 }

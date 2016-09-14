@@ -39,27 +39,27 @@ final class MemcachedMockNotSupportedMethodsTest extends PHPUnit_Framework_TestC
 
     public function provideNotSupportedMethods()
     {
-        return array(
-            array('addByKey', null, null),
-            array('appendByKey'),
-            array('cas'),
-            array('casByKey'),
-            array('decrementByKey'),
-            array('deleteByKey'),
-            array('deleteMultiByKey', null, array()),
-            array('fetch'),
-            array('fetchAll'),
-            array('getByKey'),
-            array('getDelayed', array()),
-            array('getDelayedByKey', null, array()),
-            array('getMultiByKey', null, array()),
-            array('getServerByKey'),
-            array('incrementByKey'),
-            array('prependByKey'),
-            array('replaceByKey'),
-            array('setByKey'),
-            array('setMultiByKey', null, array()),
-            array('touchByKey'),
-        );
+        return [
+            ['addByKey', null, null],
+            ['appendByKey'],
+            ['cas'],
+            ['casByKey'],
+            ['decrementByKey'],
+            ['deleteByKey'],
+            ['deleteMultiByKey', null, []],
+            ['fetch'],
+            ['fetchAll'],
+            ['getByKey'],
+            ['getDelayed', []],
+            ['getDelayedByKey', null, []],
+            ['getMultiByKey', null, []],
+            ['getServerByKey'],
+            ['incrementByKey'],
+            ['prependByKey'],
+            ['replaceByKey'],
+            ['setByKey'],
+            ['setMultiByKey', null, []],
+            ['touchByKey'],
+        ];
     }
 }
