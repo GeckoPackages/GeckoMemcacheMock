@@ -18,5 +18,4 @@ namespace GeckoPackages\MemcacheMock;
  */
 class MemcachedMockAssertException extends \UnexpectedValueException
 {
-    //
 }

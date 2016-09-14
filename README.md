@@ -6,10 +6,11 @@ Memcache mock (http://memcached.org/) which mimics the [Memcached package](http:
 Its use is for test purposes for software that support interaction with Memcache using the Memcached package.
 It provides a way to perform tests without having an instance of Memcache running or even having the Memcached package available.
 The mock is written in PHP as class and is therefor not persistent beyond the execution of the script that creates it.
+Current mocking is based on PECL=memcached-2.1.0, support for later versions is currently being developed.
 
 ### Requirements
 
-PHP 5.4 for the Callable type hint.
+PHP 5.4 (PHP7 supported). Optional HHVM support >= 3.9.
 
 ### Install
 

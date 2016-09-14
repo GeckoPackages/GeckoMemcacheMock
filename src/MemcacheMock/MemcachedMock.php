@@ -29,13 +29,13 @@ class MemcachedMock
     /**
      * @var MemcacheObject[]
      */
-    private $cache = array();
+    private $cache = [];
 
     /**
      * @var array
      */
     private $options;
-    private $connections = array();
+    private $connections = [];
     private $isPersistent = false;
     private $isPristine = false;
     private $resultCode = 0;
@@ -43,7 +43,7 @@ class MemcachedMock
 
     // mock internals
     private $delayedFlush = -1; // UNIX timestamp
-    private $deleteQueue = array();
+    private $deleteQueue = [];
     private $throwExceptionOnFailure = false;
 
     /**
@@ -54,7 +54,7 @@ class MemcachedMock
     public function __construct($persistent_id = null, $callback = null)
     {
         $this->isPersistent = null !== $persistent_id;
-        $this->options = array(
+        $this->options = [
             -1003 => 1,    // \Memcached::OPT_SERIALIZER           / 1 => \Memcached::SERIALIZER_PHP
             -1002 => '',   // \Memcached::OPT_PREFIX_KEY
             -1001 => true, // \Memcached::OPT_COMPRESSION
@@ -65,7 +65,7 @@ class MemcachedMock
                18 => 0,    // \Memcached::OPT_BINARY_PROTOCOL      / The docs on the default are wrong
                19 => 0,    // \Memcached::OPT_SEND_TIMEOUT
                20 => 0,    // \Memcached::OPT_RECV_TIMEOUT
-        );
+        ];
     }
 
     /**
@@ -122,7 +122,7 @@ class MemcachedMock
     public function addServer($host, $port, $weight = 0)
     {
         if (null !== $this->logger) {
-            $this->logger->startMethod('addServer', array('host' => $host, 'port' => $port, 'weight' => $weight));
+            $this->logger->startMethod('addServer', ['host' => $host, 'port' => $port, 'weight' => $weight]);
         }
 
         if (!$this->assertServer($host, $port, $weight)) {
@@ -131,7 +131,7 @@ class MemcachedMock
             return false;
         }
 
-        $this->connections[] = array('host' => $host, 'port' => $port, $weight);
+        $this->connections[] = ['host' => $host, 'port' => $port, $weight];
         $this->setResultOK();
         $this->stopMethod();
 
@@ -141,20 +141,32 @@ class MemcachedMock
     public function addServers(array $servers)
     {
         if (null !== $this->logger) {
-            $this->logger->startMethod('addServers', array('servers' => $servers));
+            $this->logger->startMethod('addServers', ['servers' => $servers]);
         }
 
+        /** @var array $server */
         foreach ($servers as $server) {
-            $host = $server[0];
-            $port = $server[1];
-            $weight = count($server) > 2 ? $server[2] : 0;
+            $this->assertArrayValue($server);
+            $count = count($server);
+            $weight = 0;
+            if (3 === $count) {
+                $weight = $server[2];
+            } elseif (2 !== $count) {
+                if (!$this->failedAssert(sprintf('server array must contain 2 or 3 elements, got "%d".', $count))) {
+                    $this->stopMethod();
+
+                    return false;
+                }
+            }
+
+            list($host, $port) = $server;
             if (!$this->assertServer($host, $port, $weight)) {
                 $this->stopMethod();
 
                 return false;
             }
 
-            $this->connections[] = array('host' => $host, 'port' => $port, $weight);
+            $this->connections[] = ['host' => $host, 'port' => $port, $weight];
         }
 
         $this->setResultOK();
@@ -193,9 +205,10 @@ class MemcachedMock
             $this->logger->startMethod('getServerList');
         }
 
-        $servers = array();
+        $servers = [];
         foreach ($this->connections as $connection) {
-            $servers[] = array('host' => $connection['host'], 'port' => $connection['port']);
+            // do _not_ return weight, @see https://github.com/php-memcached-dev/php-memcached/pull/56
+            $servers[] = ['host' => $connection['host'], 'port' => $connection['port']];
         }
 
         $this->setResultOK();
@@ -234,7 +247,7 @@ class MemcachedMock
             $this->logger->startMethod('quit');
         }
 
-        $this->connections = array();
+        $this->connections = [];
         $this->setResultOK();
         $this->stopMethod();
 
@@ -247,7 +260,7 @@ class MemcachedMock
             $this->logger->startMethod('resetServerList');
         }
 
-        $this->connections = array();
+        $this->connections = [];
         $this->setResultOK();
         $this->stopMethod();
 
@@ -266,7 +279,7 @@ class MemcachedMock
     public function getOption($option)
     {
         if (null !== $this->logger) {
-            $this->logger->startMethod('getOption', array('option' => $option));
+            $this->logger->startMethod('getOption', ['option' => $option]);
         }
 
         if (!$this->assertOption($option)) {
@@ -290,7 +303,7 @@ class MemcachedMock
     public function setOption($option, $value)
     {
         if (null !== $this->logger) {
-            $this->logger->startMethod('setOption', array('option' => $option, 'value' => $value));
+            $this->logger->startMethod('setOption', ['option' => $option, 'value' => $value]);
         }
 
         if (!$this->setOptionImpl($option, $value)) {
@@ -313,7 +326,7 @@ class MemcachedMock
     public function setOptions(array $options)
     {
         if (null !== $this->logger) {
-            $this->logger->startMethod('setOptions', array('options' => $options));
+            $this->logger->startMethod('setOptions', ['options' => $options]);
         }
 
         $result = 1;
@@ -345,14 +358,14 @@ class MemcachedMock
         }
 
         switch ($option) {
-            case -1002 : // \Memcached::OPT_PREFIX_KEY
+            case -1002: // \Memcached::OPT_PREFIX_KEY
                 if (!$this->assertPrefix($value)) {
                     return false;
                 }
 
                 break;
-            case 19 :    // \Memcached::OPT_SEND_TIMEOUT
-            case 20 :    // \Memcached::OPT_RECV_TIMEOUT
+            case 19:    // \Memcached::OPT_SEND_TIMEOUT
+            case 20:    // \Memcached::OPT_RECV_TIMEOUT
                 if (!$this->assertIntValue($value, sprintf('Invalid value for option "%d".', $option))) {
                     return false;
                 }
@@ -402,9 +415,9 @@ class MemcachedMock
             return false;
         }
 
-        $stats = array();
+        $stats = [];
         foreach ($this->connections as $connection) {
-            $stats[sprintf('%s:%d', $connection['host'], $connection['port'])] = array('version' => '1.x.dev');
+            $stats[sprintf('%s:%d', $connection['host'], $connection['port'])] = ['version' => '1.x.dev'];
         }
 
         $this->setResultOK();
@@ -425,7 +438,7 @@ class MemcachedMock
             return false;
         }
 
-        $versions = array();
+        $versions = [];
         foreach ($this->connections as $connection) {
             $versions[sprintf('%s:%d', $connection['host'], $connection['port'])] = 'x.x.mock';
         }
@@ -467,7 +480,7 @@ class MemcachedMock
     public function add($key, $value, $expiration = null)
     {
         if (null !== $this->logger) {
-            $this->logger->startMethod('add', array('key' => $key, 'value' => $value, 'expiration' => $expiration));
+            $this->logger->startMethod('add', ['key' => $key, 'value' => $value, 'expiration' => $expiration]);
         }
 
         if (!$this->assertConnected()) {
@@ -520,13 +533,13 @@ class MemcachedMock
     public function append($key, $value)
     {
         if (null !== $this->logger) {
-            $this->logger->startMethod('append', array('key' => $key, 'value' => $value));
+            $this->logger->startMethod('append', ['key' => $key, 'value' => $value]);
         }
 
         // Assert compression is off
 
         if (!$this->assertConnected()) {
-            $this->setResultFailed(5);// \Memcached::RES_WRITE_FAILURE
+            $this->setResultFailed(5); // \Memcached::RES_WRITE_FAILURE
             $this->stopMethod();
 
             return false;
@@ -571,7 +584,7 @@ class MemcachedMock
     public function decrement($key, $offset = 1, $initial_value = 0, $expiry = 0)
     {
         if (null !== $this->logger) {
-            $this->logger->startMethod('decrement', array('key' => $key, 'offset' => $offset, 'initial_value' => $initial_value, 'expiry' => $expiry));
+            $this->logger->startMethod('decrement', ['key' => $key, 'offset' => $offset, 'initial_value' => $initial_value, 'expiry' => $expiry]);
         }
 
         if (!$this->assertConnected()) {
@@ -634,7 +647,7 @@ class MemcachedMock
     public function delete($key, $time = 0)
     {
         if (null !== $this->logger) {
-            $this->logger->startMethod('delete', array('key' => $key, 'time' => $time));
+            $this->logger->startMethod('delete', ['key' => $key, 'time' => $time]);
         }
 
         $result = $this->deleteImpl($key, $time);
@@ -646,7 +659,7 @@ class MemcachedMock
     public function deleteMulti(array $keys, $time = 0)
     {
         if (null !== $this->logger) {
-            $this->logger->startMethod('deleteMulti', array('keys' => $keys, 'time' => $time));
+            $this->logger->startMethod('deleteMulti', ['keys' => $keys, 'time' => $time]);
         }
 
         if (!$this->assertConnected()) {
@@ -703,7 +716,7 @@ class MemcachedMock
     public function flush($delay = 0)
     {
         if (null !== $this->logger) {
-            $this->logger->startMethod('flush', array('delay' => $delay));
+            $this->logger->startMethod('flush', ['delay' => $delay]);
         }
 
         if (!$this->assertConnected()) {
@@ -728,7 +741,7 @@ class MemcachedMock
     public function get($key, callable $cache_cb = null, &$cas_token = null)
     {
         if (null !== $this->logger) {
-            $this->logger->startMethod('get', array('key' => $key, 'cache_cb' => null !== $cache_cb, 'cas_token' => null !== $cas_token));
+            $this->logger->startMethod('get', ['key' => $key, 'cache_cb' => null !== $cache_cb, 'cas_token' => null !== $cas_token]);
         }
 
         if (!$this->assertConnected()) {
@@ -783,7 +796,7 @@ class MemcachedMock
     public function getMulti(array $keys, array &$cas_tokens = null, $flags = null)
     {
         if (null !== $this->logger) {
-            $this->logger->startMethod('getMulti', array('keys' => $keys, 'cas_tokens' => null !== $cas_tokens, 'flags' => $flags));
+            $this->logger->startMethod('getMulti', ['keys' => $keys, 'cas_tokens' => null !== $cas_tokens, 'flags' => $flags]);
         }
 
         if (!$this->assertConnected()) {
@@ -792,7 +805,7 @@ class MemcachedMock
             return false;
         }
 
-        $result = array();
+        $result = [];
         for ($i = 0, $count = count($keys); $i < $count; ++$i) {
             if (!$this->assertKey($keys[$i])) {
                 $this->stopMethod();
@@ -815,7 +828,7 @@ class MemcachedMock
     public function increment($key, $offset = 1, $initial_value = 0, $expiry = 0)
     {
         if (null !== $this->logger) {
-            $this->logger->startMethod('increment', array('key' => $key, 'offset' => $offset, 'initial_value' => $initial_value, 'expiry' => $expiry));
+            $this->logger->startMethod('increment', ['key' => $key, 'offset' => $offset, 'initial_value' => $initial_value, 'expiry' => $expiry]);
         }
 
         if (!$this->assertConnected()) {
@@ -868,7 +881,7 @@ class MemcachedMock
     public function prepend($key, $value)
     {
         if (null !== $this->logger) {
-            $this->logger->startMethod('prepend', array('key' => $key, 'value' => $value));
+            $this->logger->startMethod('prepend', ['key' => $key, 'value' => $value]);
         }
 
         if (!$this->assertConnected()) {
@@ -917,7 +930,7 @@ class MemcachedMock
     public function replace($key, $value, $expiration = null)
     {
         if (null !== $this->logger) {
-            $this->logger->startMethod('replace', array('key' => $key, 'value' => $value, 'expiration' => $expiration));
+            $this->logger->startMethod('replace', ['key' => $key, 'value' => $value, 'expiration' => $expiration]);
         }
 
         if (!$this->assertConnected()) {
@@ -970,7 +983,7 @@ class MemcachedMock
     public function set($key, $value, $expiration = null)
     {
         if (null !== $this->logger) {
-            $this->logger->startMethod('set', array('key' => $key, 'value' => $value, 'expiration' => $expiration));
+            $this->logger->startMethod('set', ['key' => $key, 'value' => $value, 'expiration' => $expiration]);
         }
 
         if (!$this->assertConnected()) {
@@ -988,7 +1001,7 @@ class MemcachedMock
     public function setMulti(array $items, $expiration = null)
     {
         if (null !== $this->logger) {
-            $this->logger->startMethod('setMulti', array('items' => $items, 'expiration' => $expiration));
+            $this->logger->startMethod('setMulti', ['items' => $items, 'expiration' => $expiration]);
         }
 
         if (!$this->assertConnected()) {
@@ -1032,7 +1045,7 @@ class MemcachedMock
     public function touch($key, $expiration)
     {
         if (null !== $this->logger) {
-            $this->logger->startMethod('touch', array('key' => $key, 'expiration' => $expiration));
+            $this->logger->startMethod('touch', ['key' => $key, 'expiration' => $expiration]);
         }
 
         // Note: only available for 'binary protocol'
@@ -1186,7 +1199,7 @@ class MemcachedMock
     private function checkForDelayedFlush()
     {
         if ($this->delayedFlush > 0 && $this->delayedFlush <= time()) {
-            $this->cache = array();
+            $this->cache = [];
             $this->delayedFlush = 0;
         }
     }
@@ -1212,7 +1225,7 @@ class MemcachedMock
     private function flushCache($delay)
     {
         if ($delay < 1) {
-            $this->cache = array();
+            $this->cache = [];
         } else {
             $this->delayedFlush = $this->normalizeTime($delay);
         }
@@ -1223,7 +1236,7 @@ class MemcachedMock
         $this->checkForDelayedFlush();
         $keys = array_keys($this->cache);
         // not use array_filter with $this in closure to prevent having to require 5.4
-        $filteredKeys = array();
+        $filteredKeys = [];
         foreach ($keys as $key) {
             if (!$this->isInDeleteQueue($key)) {
                 $filteredKeys[] = $key;
@@ -1386,6 +1399,15 @@ class MemcachedMock
         return true;
     }
 
+    private function assertArrayValue($value, $message = null)
+    {
+        if (!is_array($value)) {
+            return $this->failedAssert(sprintf('value is an array, got "%s".', is_object($value) ? get_class($value) : gettype($value)), $message);
+        }
+
+        return true;
+    }
+
     private function assertIntValue($value, $message = null)
     {
         if (!is_int($value)) {
@@ -1425,7 +1447,7 @@ class MemcachedMock
             return $this->failedAssert(sprintf('option is an integer, got "%s".', is_object($option) ? get_class($option) : gettype($option)));
         }
 
-        static $knownOptions = array(
+        static $knownOptions = [
              -1004, // \Memcached::OPT_COMPRESSION_TYPE
              -1003, // \Memcached::OPT_SERIALIZER
              -1002, // \Memcached::OPT_PREFIX_KEY
@@ -1455,7 +1477,7 @@ class MemcachedMock
                 30, // \Memcached::OPT_RANDOMIZE_REPLICA_READ
                 32, // \Memcached::OPT_TCP_KEEPALIVE
                 35, // \Memcached::OPT_REMOVE_FAILED_SERVERS
-        );
+        ];
 
         if (false === in_array($option, $knownOptions, true)) {
             return $this->failedAssert(sprintf('option is known, got "%d".', $option));
@@ -1500,7 +1522,7 @@ class MemcachedMock
         return true;
     }
 
-    private function assertServer($host, $port, $weight = 0)
+    private function assertServer($host, $port, $weight)
     {
         if (!is_string($host)) {
             $this->setResultFailed(2); // RES_HOST_LOOKUP_FAILURE
@@ -1543,9 +1565,9 @@ class MemcachedMock
      * @param string      $assert
      * @param string|null $message
      *
-     * @return false
-     *
      * @throws MemcachedMockAssertException (when configured)
+     *
+     * @return false
      */
     private function failedAssert($assert, $message = null)
     {
@@ -1575,27 +1597,27 @@ class MemcachedMock
     {
         if (null === $message) {
             switch ($code) {
-                case 2 : {
+                case 2: {
                     $message = 'getaddrinfo() or getnameinfo() HOSTNAME LOOKUP FAILURE'; // not sure why memcached returns the function names
                     break;
                 }
-                case 5 : {
+                case 5: {
                     $message = 'WRITE FAILURE';
                     break;
                 }
-                case 12 : {
+                case 12: {
                     $message = 'CONNECTION DATA EXISTS';
                     break;
                 }
-                case 14 : {
+                case 14: {
                     $message = 'NOT STORED';
                     break;
                 }
-                case 16 : {
+                case 16: {
                     $message = 'NOT FOUND';
                     break;
                 }
-                default : {
+                default: {
                     throw new \UnexpectedValueException(sprintf('Unknown result failed code "%d", supply an error message.', $code));
                 }
             }

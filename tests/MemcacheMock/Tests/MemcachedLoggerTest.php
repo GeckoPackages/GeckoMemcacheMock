@@ -32,10 +32,14 @@ final class MemcachedLoggerTest extends PHPUnit_Framework_TestCase
 
         $this->assertSame($stopWatch, $logger->getStopwatch());
 
-        $sections = $stopWatch->getSections();
-        $this->assertCount(1, $sections);
-
         $event = $stopWatch->getEvent('memcached');
         $this->assertCount(1, $event->getPeriods());
+
+        if (method_exists($stopWatch, 'getSections')) {
+            $sections = $stopWatch->getSections();
+            $this->assertCount(1, $sections);
+        } else {
+            $this->markTestSkipped('Requires symfony/stopwatch 2.6 or higher.');
+        }
     }
 }
