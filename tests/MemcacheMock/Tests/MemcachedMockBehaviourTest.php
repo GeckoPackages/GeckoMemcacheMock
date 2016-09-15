@@ -35,7 +35,7 @@ final class MemcachedMockBehaviourTest extends PHPUnit_Framework_TestCase
     public function testAdd()
     {
         $testKey = 'abc456';
-        $testValue = array(10);
+        $testValue = [10];
 
         $mock = new MemcachedMock();
         $this->assertNull($mock->getLogger());
@@ -91,7 +91,7 @@ final class MemcachedMockBehaviourTest extends PHPUnit_Framework_TestCase
         $this->assertSame($testValue.$testAppendValue, $mock->get($testKey));
         $this->assertFalse($mock->append($testKey, xml_parser_create('')));
 
-        $mock->set($testKey, array(10));
+        $mock->set($testKey, [10]);
         $this->assertFalse($mock->append($testKey, $testAppendValue));
     }
 
@@ -265,9 +265,9 @@ final class MemcachedMockBehaviourTest extends PHPUnit_Framework_TestCase
         $this->assertFalse($mock->get('a'));
         $this->assertFalse($mock->set('a', 'b'));
         $this->assertFalse($mock->set('a', 'b', 1));
-        $this->assertFalse($mock->getMulti(array('a', 'b')));
-        $this->assertFalse($mock->setMulti(array('a' => 1, 'b' => 2)));
-        $this->assertFalse($mock->deleteMulti(array('a', 'b')));
+        $this->assertFalse($mock->getMulti(['a', 'b']));
+        $this->assertFalse($mock->setMulti(['a' => 1, 'b' => 2]));
+        $this->assertFalse($mock->deleteMulti(['a', 'b']));
 
         $testKey = 'abc123';
         $testValue = 'some value';
@@ -281,9 +281,9 @@ final class MemcachedMockBehaviourTest extends PHPUnit_Framework_TestCase
         $this->assertFalse($mock->set(null, 'b', 1));
         $this->assertFalse($mock->set('a', 'b', 'test'));
         $this->assertFalse($mock->set('a', xml_parser_create('')));
-        $this->assertFalse($mock->getMulti(array('a', null)));
-        $this->assertFalse($mock->setMulti(array($key257 => $testValue1)));
-        $this->assertFalse($mock->deleteMulti(array($key257)));
+        $this->assertFalse($mock->getMulti(['a', null]));
+        $this->assertFalse($mock->setMulti([$key257 => $testValue1]));
+        $this->assertFalse($mock->deleteMulti([$key257]));
 
         $mock->setThrowExceptionsOnFailure(true);
         $keys = $mock->getAllKeys();
@@ -296,7 +296,7 @@ final class MemcachedMockBehaviourTest extends PHPUnit_Framework_TestCase
         $this->assertSame($testValue1, $mock->get($testKey1));
 
         $keys = $mock->getAllKeys();
-        $multi = $mock->getMulti(array($testKey1, $testKey));
+        $multi = $mock->getMulti([$testKey1, $testKey]);
 
         $this->assertInternalType('array', $keys);
         $this->assertCount(2, $keys);
@@ -326,21 +326,21 @@ final class MemcachedMockBehaviourTest extends PHPUnit_Framework_TestCase
         $this->assertCount(0, $keys);
 
         $expiration = time() + 10;
-        $this->assertTrue($mock->setMulti(array($testKey => $testValue, $testKey1 => $testValue1), $expiration));
-        $multi = $mock->getMulti(array($testKey1, $testKey));
+        $this->assertTrue($mock->setMulti([$testKey => $testValue, $testKey1 => $testValue1], $expiration));
+        $multi = $mock->getMulti([$testKey1, $testKey]);
         $this->assertSame($testValue, $multi[$testKey]);
         $this->assertSame($expiration, $mock->getExpiry($testKey));
         $this->assertSame($testValue1, $multi[$testKey1]);
         $this->assertSame($expiration, $mock->getExpiry($testKey1));
 
-        $this->assertTrue($mock->deleteMulti(array($testKey1, $testKey)));
+        $this->assertTrue($mock->deleteMulti([$testKey1, $testKey]));
         $this->assertFalse($mock->get($testKey1));
         $this->assertFalse($mock->get($testKey));
 
-        $this->assertTrue($mock->deleteMulti(array()));
-        $this->assertTrue($mock->setMulti(array()));
+        $this->assertTrue($mock->deleteMulti([]));
+        $this->assertTrue($mock->setMulti([]));
 
-        $multi = $mock->getMulti(array('f', 'e', 'd'));
+        $multi = $mock->getMulti(['f', 'e', 'd']);
         $this->assertInternalType('array', $multi);
         $this->assertCount(0, $multi);
 
@@ -393,13 +393,13 @@ final class MemcachedMockBehaviourTest extends PHPUnit_Framework_TestCase
         $mockReflection = new \ReflectionClass($mock);
         $method = $mockReflection->getMethod('normalizeTime');
         $method->setAccessible(true);
-        $this->assertSame(time(), $method->invokeArgs($mock, array(null)));
-        $this->assertSame(time(), $method->invokeArgs($mock, array(0)));
-        $this->assertSame(time() + 100, $method->invokeArgs($mock, array(100)));
-        $this->assertSame(time() - 50, $method->invokeArgs($mock, array(-50)));
-        $this->assertSame(time(), $method->invokeArgs($mock, array(time())));
-        $this->assertSame(time() + 90, $method->invokeArgs($mock, array(time() + 90)));
-        $this->assertSame(time() - 85, $method->invokeArgs($mock, array(time() - 85)));
+        $this->assertSame(time(), $method->invokeArgs($mock, [null]));
+        $this->assertSame(time(), $method->invokeArgs($mock, [0]));
+        $this->assertSame(time() + 100, $method->invokeArgs($mock, [100]));
+        $this->assertSame(time() - 50, $method->invokeArgs($mock, [-50]));
+        $this->assertSame(time(), $method->invokeArgs($mock, [time()]));
+        $this->assertSame(time() + 90, $method->invokeArgs($mock, [time() + 90]));
+        $this->assertSame(time() - 85, $method->invokeArgs($mock, [time() - 85]));
     }
 
     /**
@@ -420,7 +420,7 @@ final class MemcachedMockBehaviourTest extends PHPUnit_Framework_TestCase
         $this->assertFalse($mock->setOption(20, ''));
         $this->assertFalse($mock->setOption(32, xml_parser_create('')));
         $this->assertFalse($mock->setOption(-1002, null));
-        $this->assertFalse($mock->setOptions(array(-1002 => null)));
+        $this->assertFalse($mock->setOptions([-1002 => null]));
 
         $this->assertTrue($mock->setOption(19, 1));
         $this->assertTrue($mock->setOption(20, 20));
@@ -431,7 +431,7 @@ final class MemcachedMockBehaviourTest extends PHPUnit_Framework_TestCase
         $this->assertTrue($mock->setOption(-1002, 'some_prefix'));
         $this->assertSame('some_prefix', $mock->getOption(-1002));
 
-        $options = array(0 => 'a1', 1 => 'a2', 2 => 'a3', 5 => 'a4', 6 => 'a5', 8 => 'a6');
+        $options = [0 => 'a1', 1 => 'a2', 2 => 'a3', 5 => 'a4', 6 => 'a5', 8 => 'a6'];
 
         $this->assertTrue($mock->setOptions($options));
 
@@ -439,7 +439,7 @@ final class MemcachedMockBehaviourTest extends PHPUnit_Framework_TestCase
             $this->assertSame($value, $mock->getOption($option));
         }
 
-        $this->assertTrue($mock->setOptions(array()));
+        $this->assertTrue($mock->setOptions([]));
     }
 
     /**
@@ -449,7 +449,7 @@ final class MemcachedMockBehaviourTest extends PHPUnit_Framework_TestCase
     public function testOptionException()
     {
         $mock = $this->getMemcachedMock();
-        $mock->setOptions(array(667 => 123));
+        $mock->setOptions([667 => 123]);
     }
 
     /**
@@ -472,10 +472,10 @@ final class MemcachedMockBehaviourTest extends PHPUnit_Framework_TestCase
 
     public function provideInvalidOptionValues()
     {
-        return array(
-            array(19, 'a', 'assertIntValue failed value is an integer, got "string". Invalid value for option "19".'),
-            array(20, null, 'assertIntValue failed value is an integer, got "NULL". Invalid value for option "20".'),
-        );
+        return [
+            [19, 'a', 'assertIntValue failed value is an integer, got "string". Invalid value for option "19".'],
+            [20, null, 'assertIntValue failed value is an integer, got "NULL". Invalid value for option "20".'],
+        ];
     }
 
     public function testPrepend()
@@ -497,7 +497,7 @@ final class MemcachedMockBehaviourTest extends PHPUnit_Framework_TestCase
         $this->assertSame($testAppendValue.$testValue, $mock->get($testKey));
         $this->assertFalse($mock->prepend($testKey, xml_parser_create('')));
 
-        $mock->set($testKey, array(10));
+        $mock->set($testKey, [10]);
         $this->assertFalse($mock->prepend($testKey, $testAppendValue));
     }
 
@@ -541,7 +541,10 @@ final class MemcachedMockBehaviourTest extends PHPUnit_Framework_TestCase
         $this->assertFalse($mock->getVersion());
         $this->assertFalse($mock->isPersistent());
         $this->assertFalse($mock->isPristine());
-        $this->assertFalse($mock->addServers(array(1)));
+        $this->assertFalse($mock->addServers([1]));
+        $this->assertFalse($mock->addServers([['a', 'b']]));
+        $this->assertFalse($mock->addServers([['127.0.0.1', 123, 'a']]));
+        $this->assertFalse($mock->addServers([['127.0.0.1', 123], ['127.0.0.1', 'a']]));
 
         $mock->setThrowExceptionsOnFailure(true);
 
@@ -566,10 +569,10 @@ final class MemcachedMockBehaviourTest extends PHPUnit_Framework_TestCase
 
         $this->assertTrue(
             $mock->addServers(
-                array(
-                    array('127.0.0.2', 11212),
-                    array('127.0.0.3', 11213, 3),
-                )
+                [
+                    ['127.0.0.2', 11212],
+                    ['127.0.0.3', 11213, 3],
+                ]
             )
         );
 
@@ -642,7 +645,7 @@ final class MemcachedMockBehaviourTest extends PHPUnit_Framework_TestCase
         $this->assertFalse($mock->getStats());
         $this->assertFalse($mock->addServer(null, null));
 
-        $this->assertTrue($mock->addServers(array()));
+        $this->assertTrue($mock->addServers([]));
     }
 
     /**
@@ -691,21 +694,21 @@ final class MemcachedMockBehaviourTest extends PHPUnit_Framework_TestCase
         $mockReflection = new \ReflectionClass($mock);
         $method = $mockReflection->getMethod('setResultFailed');
         $method->setAccessible(true);
-        $method->invokeArgs($mock, array($code, $message));
+        $method->invokeArgs($mock, [$code, $message]);
         $this->assertSame($code, $mock->getResultCode());
         $this->assertSame($resultMessage, $mock->getResultMessage());
     }
 
     public function provideErrorMap()
     {
-        return array(
-            array(2, 'getaddrinfo() or getnameinfo() HOSTNAME LOOKUP FAILURE'),
-            array(5, 'WRITE FAILURE'),
-            array(12, 'CONNECTION DATA EXISTS'),
-            array(14, 'NOT STORED'),
-            array(16, 'NOT FOUND'),
-            array(667, 'custom message', 'custom message'),
-        );
+        return [
+            [2, 'getaddrinfo() or getnameinfo() HOSTNAME LOOKUP FAILURE'],
+            [5, 'WRITE FAILURE'],
+            [12, 'CONNECTION DATA EXISTS'],
+            [14, 'NOT STORED'],
+            [16, 'NOT FOUND'],
+            [667, 'custom message', 'custom message'],
+        ];
     }
 
     /**
@@ -718,7 +721,7 @@ final class MemcachedMockBehaviourTest extends PHPUnit_Framework_TestCase
         $mockReflection = new \ReflectionClass($mock);
         $method = $mockReflection->getMethod('setResultFailed');
         $method->setAccessible(true);
-        $method->invokeArgs($mock, array(555));
+        $method->invokeArgs($mock, [555]);
     }
 
     public function testPrefixUsage()
@@ -753,7 +756,7 @@ final class MemcachedMockBehaviourTest extends PHPUnit_Framework_TestCase
         $this->assertTrue(in_array($testPrefix.$testKey, $keys, true));
         $this->assertTrue(in_array($testPrefix.$testKey.'1', $keys, true));
 
-        $multi = $mock->getMulti(array($testKey, $testKey.'1'));
+        $multi = $mock->getMulti([$testKey, $testKey.'1']);
         $this->assertInternalType('array', $multi);
         $this->assertCount(2, $multi);
         $this->assertArrayHasKey($testKey, $multi);
