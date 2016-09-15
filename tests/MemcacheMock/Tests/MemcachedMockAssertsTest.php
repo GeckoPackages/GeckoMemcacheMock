@@ -99,7 +99,8 @@ final class MemcachedMockAssertsTest extends PHPUnit_Framework_TestCase
             ['assertDelay', [null], false, 'assertDelay failed delay is an integer, got "NULL".'],
             ['assertExpiration', [1], true],
             ['assertExpiration', [null], true],
-            ['assertExpiration', [new \stdClass()], false, 'assertExpiration failed expiration is an integer, got "stdClass".'],
+            ['assertExpiration', [new \stdClass()], false, 'assertExpiration failed expiration is an integer >= 0 or null, got "stdClass".'],
+            ['assertExpiration', [-1], false, 'assertExpiration failed expiration is an integer >= 0 or null, got "-1".'],
             ['assertIntValue', [-1], true],
             ['assertIntValue', [0], true],
             ['assertIntValue', [1], true],
@@ -111,7 +112,7 @@ final class MemcachedMockAssertsTest extends PHPUnit_Framework_TestCase
             ['assertKey', ['key'], true],
             ['assertKey', [null], false, 'assertKey failed key is a string, got "NULL".'],
             ['assertKey', [$key256], true],
-            ['assertKey', [$key257], false, sprintf('assertKey failed key (+ prefix) is less than 256 characters, got "%s" (257).', $key257)],
+            ['assertKey', [$key257], false, sprintf('assertKey failed key is less than 256 characters, got "%s" (257).', $key257)],
             ['assertOffset', [-1], true],
             ['assertOffset', [0], true],
             ['assertOffset', [1], true],
@@ -160,7 +161,7 @@ final class MemcachedMockAssertsTest extends PHPUnit_Framework_TestCase
 
     /**
      * @expectedException GeckoPackages\MemcacheMock\MemcachedMockAssertException
-     * @expectedExceptionMessage assertHasNotInCache failed key "a" is not in cache.
+     * @expectedExceptionMessageRegEx /^assertHasNotInCache failed key "a" is not in cache.$/
      */
     public function testAssertHasNotInCache()
     {
@@ -201,6 +202,27 @@ final class MemcachedMockAssertsTest extends PHPUnit_Framework_TestCase
         $method = $mockReflection->getMethod('assertHasNotInDeleteQueue');
         $method->setAccessible(true);
         $this->assertFalse($method->invokeArgs($mock, ['a']));
+    }
+
+    /**
+     * @expectedException GeckoPackages\MemcacheMock\MemcachedMockAssertException
+     * @expectedExceptionMessageRegExp /^assertKey failed key with prefix is less than 256 characters, got "_prefix_test_prefix_test_prefix_test_prefix_test_prefix_test_aaabbbcccdddeeefffggghhhhiiijjjjkkklllmmmnnnooopppqqqrrrssstttuuuvvvwwwxxxyyyzzzaaabbbcccdddeeefffggghhhhiiijjjjkkklllmmmnnnooopppqqqrrrssstttuuuvvvwwwxxxyyyzzzaaabbbcccdddeeefffggghhhhiiijjjjkkklllmmmnnnooopppqqqrrrssstttuuuvvvwwwxxxyyyzzz" \(301\).$/
+     */
+    public function testAssertKeyWithPrefixSet()
+    {
+        $prefix = '_prefix_test_prefix_test_prefix_test_prefix_test_prefix_test_';
+        $mock = new MemcachedMock();
+        $mock->setThrowExceptionsOnFailure(true);
+        $mock->setOption(-1002, $prefix);
+
+        $mockReflection = new \ReflectionClass($mock);
+        $method = $mockReflection->getMethod('getPrefix');
+        $method->setAccessible(true);
+        $this->assertSame($prefix, $method->invokeArgs($mock, []));
+
+        $method = $mockReflection->getMethod('assertKey');
+        $method->setAccessible(true);
+        $method->invokeArgs($mock, ['aaabbbcccdddeeefffggghhhhiiijjjjkkklllmmmnnnooopppqqqrrrssstttuuuvvvwwwxxxyyyzzzaaabbbcccdddeeefffggghhhhiiijjjjkkklllmmmnnnooopppqqqrrrssstttuuuvvvwwwxxxyyyzzzaaabbbcccdddeeefffggghhhhiiijjjjkkklllmmmnnnooopppqqqrrrssstttuuuvvvwwwxxxyyyzzz']);
     }
 
     public function testMultipleAssertFailures()
