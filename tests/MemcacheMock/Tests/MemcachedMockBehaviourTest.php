@@ -53,7 +53,7 @@ final class MemcachedMockBehaviourTest extends PHPUnit_Framework_TestCase
 
     /**
      * @expectedException GeckoPackages\MemcacheMock\MemcachedMockAssertException
-     * @expectedExceptionMessageRegExp #^assertConnected failed is connected.$#
+     * @expectedExceptionMessageRegExp /^assertConnected failed is connected.$/
      */
     public function testAssertFailToException()
     {
@@ -377,6 +377,18 @@ final class MemcachedMockBehaviourTest extends PHPUnit_Framework_TestCase
         $expiration = 3600;
         $this->assertTrue($mock->set($testKey1, $testValue1, $expiration));
         $this->assertSame(time() + $expiration, $mock->getExpiry($testKey1));
+
+        $this->assertTrue($mock->set('a1', 'b'));
+        $this->assertSame(0, $mock->getExpiry('a1'));
+        $this->assertTrue($mock->set('a1', 'b', 100));
+        $this->assertSame(time() + 100, $mock->getExpiry('a1'));
+
+        $this->assertTrue($mock->add('a2', 'b'));
+        $this->assertSame(0, $mock->getExpiry('a2'));
+
+        $this->assertSame(1, $mock->decrement('a3', 1, 1));
+        $this->assertSame(0, $mock->getExpiry('a3'));
+        $this->assertSame(1, $mock->get('a3'));
     }
 
     /**
@@ -417,14 +429,26 @@ final class MemcachedMockBehaviourTest extends PHPUnit_Framework_TestCase
         $this->assertFalse($mock->increment($testKey, 1));
     }
 
-    public function testNormalizeTime()
+    public function testNormalizeDelayToAbsoluteTime()
     {
         $mock = new MemcachedMock();
         $mockReflection = new \ReflectionClass($mock);
-        $method = $mockReflection->getMethod('normalizeTime');
+        $method = $mockReflection->getMethod('normalizeDelayToAbsoluteTime');
         $method->setAccessible(true);
         $this->assertSame(time(), $method->invokeArgs($mock, [null]));
         $this->assertSame(time(), $method->invokeArgs($mock, [0]));
+        $this->assertSame(time() + 100, $method->invokeArgs($mock, [100]));
+        $this->assertSame(time() - 50, $method->invokeArgs($mock, [-50]));
+    }
+
+    public function testNormalizeExpirationTime()
+    {
+        $mock = new MemcachedMock();
+        $mockReflection = new \ReflectionClass($mock);
+        $method = $mockReflection->getMethod('normalizeExpirationTime');
+        $method->setAccessible(true);
+        $this->assertSame(0, $method->invokeArgs($mock, [null]));
+        $this->assertSame(0, $method->invokeArgs($mock, [0]));
         $this->assertSame(time() + 100, $method->invokeArgs($mock, [100]));
         $this->assertSame(time() - 50, $method->invokeArgs($mock, [-50]));
         $this->assertSame(time(), $method->invokeArgs($mock, [time()]));
@@ -474,7 +498,7 @@ final class MemcachedMockBehaviourTest extends PHPUnit_Framework_TestCase
 
     /**
      * @expectedException \UnexpectedValueException
-     * @expectedExceptionMessageRegExp #^assertOption failed option is known, got "667".$#
+     * @expectedExceptionMessageRegExp /^assertOption failed option is known, got "667".$/
      */
     public function testOptionException()
     {
@@ -693,15 +717,16 @@ final class MemcachedMockBehaviourTest extends PHPUnit_Framework_TestCase
         $mock = $this->getMemcachedMock();
         $expiryStart = time() + 10;
 
-        $mock->set($testKey, $testValue, $expiryStart);
+        $this->assertTrue($mock->set($testKey, $testValue, $expiryStart));
         $this->assertSame($expiryStart, $mock->getExpiry($testKey));
+        $this->assertSame($testValue, $mock->get($testKey));
 
         $expiry1 = time() + 10;
-        $mock->touch($testKey, $expiry1);
+        $this->assertTrue($mock->touch($testKey, $expiry1));
         $this->assertSame($expiry1, $mock->getExpiry($testKey));
 
         $expiry2 = 5;
-        $mock->touch($testKey, $expiry2);
+        $this->assertTrue($mock->touch($testKey, $expiry2));
         $this->assertSame(time() + $expiry2, $mock->getExpiry($testKey));
 
         $mock->setThrowExceptionsOnFailure(false);
@@ -743,7 +768,7 @@ final class MemcachedMockBehaviourTest extends PHPUnit_Framework_TestCase
 
     /**
      * @expectedException \UnexpectedValueException
-     * @expectedExceptionMessageRegExp #^Unknown result failed code "555", supply an error message.$#
+     * @expectedExceptionMessageRegExp /^Unknown result failed code "555", supply an error message.$/
      */
     public function testMissingResultErrorMessage()
     {

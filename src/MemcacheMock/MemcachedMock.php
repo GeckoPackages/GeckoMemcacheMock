@@ -497,6 +497,7 @@ class MemcachedMock
         }
 
         $key = $this->getPrefix().$key;
+        $this->checkForDelayedDelete($key);
         if (!$this->assertHasNotInDeleteQueue($key)) {
             $this->setResultFailed(12); // \Memcached::RES_DATA_EXISTS doc states \Memcached::RES_NOTSTORED :(
             $this->stopMethod();
@@ -581,10 +582,10 @@ class MemcachedMock
         return true;
     }
 
-    public function decrement($key, $offset = 1, $initial_value = 0, $expiry = 0)
+    public function decrement($key, $offset = 1, $initial_value = 0, $expiration = 0)
     {
         if (null !== $this->logger) {
-            $this->logger->startMethod('decrement', ['key' => $key, 'offset' => $offset, 'initial_value' => $initial_value, 'expiry' => $expiry]);
+            $this->logger->startMethod('decrement', ['key' => $key, 'offset' => $offset, 'initial_value' => $initial_value, 'expiry' => $expiration]);
         }
 
         if (!$this->assertConnected()) {
@@ -620,9 +621,9 @@ class MemcachedMock
                 $value = 0;
             }
 
-            $expiry = $this->fetchExpirationFromCache($key);
+            $expiration = $this->fetchExpirationFromCache($key);
         } else {
-            if (!$this->assertExpiration($expiry)) {
+            if (!$this->assertExpiration($expiration)) {
                 $this->stopMethod();
 
                 return false;
@@ -637,7 +638,7 @@ class MemcachedMock
             $value = $initial_value;
         }
 
-        $this->storeValueInCache($key, $value, $expiry);
+        $this->storeValueInCache($key, $value, $expiration);
         $this->setResultOK();
         $this->stopMethod();
 
@@ -691,7 +692,7 @@ class MemcachedMock
             return false;
         }
 
-        if (!$this->assertExpiration($time)) {
+        if (!$this->assertDelay($time)) {
             return false;
         }
 
@@ -825,10 +826,10 @@ class MemcachedMock
         return $result;
     }
 
-    public function increment($key, $offset = 1, $initial_value = 0, $expiry = 0)
+    public function increment($key, $offset = 1, $initial_value = 0, $expiration = 0)
     {
         if (null !== $this->logger) {
-            $this->logger->startMethod('increment', ['key' => $key, 'offset' => $offset, 'initial_value' => $initial_value, 'expiry' => $expiry]);
+            $this->logger->startMethod('increment', ['key' => $key, 'offset' => $offset, 'initial_value' => $initial_value, 'expiry' => $expiration]);
         }
 
         if (!$this->assertConnected()) {
@@ -860,9 +861,9 @@ class MemcachedMock
             }
 
             $value += $offset;
-            $expiry = $this->fetchExpirationFromCache($key);
+            $expiration = $this->fetchExpirationFromCache($key);
         } else {
-            if (!$this->assertExpiration($expiry)) {
+            if (!$this->assertExpiration($expiration)) {
                 $this->stopMethod();
 
                 return false;
@@ -871,7 +872,7 @@ class MemcachedMock
             $value = $initial_value;
         }
 
-        $this->storeValueInCache($key, $value, $expiry);
+        $this->storeValueInCache($key, $value, $expiration);
         $this->setResultOK();
         $this->stopMethod();
 
@@ -947,6 +948,7 @@ class MemcachedMock
         }
 
         $key = $this->getPrefix().$key;
+        $this->checkForDelayedDelete($key);
         if (!$this->assertHasNotInDeleteQueue($key)) {
             $this->setResultFailed(12); // \Memcached::RES_DATA_EXISTS doc states \Memcached::RES_NOTSTORED :(
             $this->stopMethod();
@@ -1081,7 +1083,7 @@ class MemcachedMock
             return false;
         }
 
-        $this->cache[$key]->setExpireTime($this->normalizeTime($expiration));
+        $this->cache[$key]->setExpireTime($this->normalizeExpirationTime($expiration));
         $this->setResultOK();
         $this->stopMethod();
 
@@ -1196,6 +1198,13 @@ class MemcachedMock
     // internals
     //--------------------------------------------------------
 
+    private function checkForDelayedDelete($key)
+    {
+        if (array_key_exists($key, $this->deleteQueue) && time() >= $this->deleteQueue[$key]) {
+            unset($this->deleteQueue[$key], $this->cache[$key]);
+        }
+    }
+
     private function checkForDelayedFlush()
     {
         if ($this->delayedFlush > 0 && $this->delayedFlush <= time()) {
@@ -1212,7 +1221,7 @@ class MemcachedMock
             return;
         }
 
-        $delay = $this->normalizeTime($delay);
+        $delay = $this->normalizeDelayToAbsoluteTime($delay);
         // `add` and `replace` are effected by the delay
         if (array_key_exists($key, $this->deleteQueue) && $this->deleteQueue[$key] < $delay) {
             // re-queued for deleting, keep current first time of deletion FIXME make sure this is memcached behaviour.
@@ -1227,7 +1236,7 @@ class MemcachedMock
         if ($delay < 1) {
             $this->cache = [];
         } else {
-            $this->delayedFlush = $this->normalizeTime($delay);
+            $this->delayedFlush = $this->normalizeDelayToAbsoluteTime($delay);
         }
     }
 
@@ -1249,11 +1258,14 @@ class MemcachedMock
     private function isInCache($key)
     {
         $this->checkForDelayedFlush();
+        $this->checkForDelayedDelete($key);
+
         if (!array_key_exists($key, $this->cache)) {
             return false;
         }
 
-        if ($this->cache[$key]->getExpireTime() < time()) {
+        $expireTime = $this->cache[$key]->getExpireTime();
+        if (0 !== $expireTime && $expireTime < time()) {
             unset($this->cache[$key]);
 
             return false;
@@ -1264,30 +1276,30 @@ class MemcachedMock
 
     private function isInDeleteQueue($key)
     {
-        if (!array_key_exists($key, $this->deleteQueue)) {
-            return false;
-        }
-
-        if ($this->deleteQueue[$key] < time()) {
-            unset($this->deleteQueue[$key]);
-
-            return false;
-        }
-
-        return true;
+        return array_key_exists($key, $this->deleteQueue);
     }
 
-    private function normalizeTime($time)
+    // @see http://php.net/manual/en/memcached.expiration.php
+    private function normalizeExpirationTime($expiration)
     {
-        if (null === $time || 0 === $time) {
+        if (null === $expiration || 0 === $expiration) {
+            return 0;
+        }
+
+        if ($expiration < 2592000) { // 60 * 60 * 24 * 30
+            return time() + $expiration;
+        }
+
+        return $expiration;
+    }
+
+    private function normalizeDelayToAbsoluteTime($delay)
+    {
+        if (null === $delay) {
             return time();
         }
 
-        if ($time < 2592000) { // 60 * 60 * 24 * 30 @see http://php.net/manual/en/memcached.expiration.php
-            return time() + $time;
-        }
-
-        return $time;
+        return time() + $delay;
     }
 
     /**
@@ -1295,7 +1307,7 @@ class MemcachedMock
      *
      * @param string $key
      *
-     * @return int|null
+     * @return int
      */
     private function fetchExpirationFromCache($key)
     {
@@ -1323,12 +1335,21 @@ class MemcachedMock
      */
     private function storeValueInCache($key, $value, $expiration = null)
     {
-        $this->cache[$key] = new MemcacheObject($key, serialize($value), $this->normalizeTime($expiration));
+        $this->cache[$key] = new MemcacheObject($key, serialize($value), $this->normalizeExpirationTime($expiration));
     }
 
     //--------------------------------------------------------
     // asserts
     //--------------------------------------------------------
+
+    private function assertArrayValue($value, $message = null)
+    {
+        if (!is_array($value)) {
+            return $this->failedAssert(sprintf('value is an array, got "%s".', is_object($value) ? get_class($value) : gettype($value)), $message);
+        }
+
+        return true;
+    }
 
     private function assertCallBackResult($result, $message = null)
     {
@@ -1365,8 +1386,12 @@ class MemcachedMock
 
     private function assertExpiration($expiration)
     {
-        if (null !== $expiration && !is_int($expiration)) {
-            return $this->failedAssert(sprintf('expiration is an integer, got "%s".', is_object($expiration) ? get_class($expiration) : gettype($expiration)));
+        if (null === $expiration) {
+            return true;
+        }
+
+        if (!is_int($expiration) || $expiration < 0) {
+            return $this->failedAssert(sprintf('expiration is an integer >= 0 or null, got "%s".', is_object($expiration) ? get_class($expiration) : var_export($expiration, true)));
         }
 
         return true;
@@ -1399,15 +1424,6 @@ class MemcachedMock
         return true;
     }
 
-    private function assertArrayValue($value, $message = null)
-    {
-        if (!is_array($value)) {
-            return $this->failedAssert(sprintf('value is an array, got "%s".', is_object($value) ? get_class($value) : gettype($value)), $message);
-        }
-
-        return true;
-    }
-
     private function assertIntValue($value, $message = null)
     {
         if (!is_int($value)) {
@@ -1423,9 +1439,13 @@ class MemcachedMock
             return $this->failedAssert(sprintf('key is a string, got "%s".', is_object($key) ? get_class($key) : gettype($key)), $message);
         }
 
+        if (strlen($key) > 256) {
+            return $this->failedAssert(sprintf('key is less than 256 characters, got "%s" (%d).', $key, strlen($key)), $message);
+        }
+
         $key = $this->getPrefix().$key;
         if (strlen($key) > 256) {
-            return $this->failedAssert(sprintf('key (+ prefix) is less than 256 characters, got "%s" (%d).', $key, strlen($key)), $message);
+            return $this->failedAssert(sprintf('key with prefix is less than 256 characters, got "%s" (%d).', $key, strlen($key)), $message);
         }
 
         return true;

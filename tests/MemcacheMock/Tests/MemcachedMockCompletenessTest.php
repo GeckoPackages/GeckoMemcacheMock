@@ -55,20 +55,26 @@ final class MemcachedMockCompletenessTest extends PHPUnit_Framework_TestCase
                 }
 
                 $actualMethod = $actual[$name];
-                self::assertSame($expectedMethod->getNumberOfParameters(), $actualMethod->getNumberOfParameters(), sprintf('Number of parameters mismatched for method "%s".', $name));
-                self::assertSame($expectedMethod->getNumberOfRequiredParameters(), $actualMethod->getNumberOfRequiredParameters(), sprintf('Number of required parameters mismatched for method "%s".', $name));
+                if ($expectedMethod->getNumberOfParameters() !== $actualMethod->getNumberOfParameters()) {
+                    self::fail(sprintf(
+                        "Number of parameters mismatched for method \"%s\".\nExpected:\n\"%s\"\nGot:\n\"%s\"",
+                        $name, self::describeParameters($expectedMethod), self::describeParameters($actualMethod)
+                    ));
+                }
+
+                if ($expectedMethod->getNumberOfRequiredParameters() !== $actualMethod->getNumberOfRequiredParameters()) {
+                    self::fail(sprintf(
+                        "Number of required parameters mismatched for method \"%s\".\nExpected:\n\"%s\"\nGot:\n\"%s\"",
+                        $name, self::describeParameters($expectedMethod), self::describeParameters($actualMethod)
+                    ));
+                }
+
                 if ($expectedMethod->getNumberOfParameters() > 0) {
                     $expectedParameters = $expectedMethod->getParameters();
                     $actualParameters = $actualMethod->getParameters();
                     for ($i = 0, $count = count($expectedParameters); $i < $count - 1; ++$i) {
                         self::assertSame($expectedParameters[$i]->getName(), $actualParameters[$i]->getName(), sprintf('Parameter naming mismatched for method "%s".', $name));
                         self::assertSame($expectedParameters[$i]->isOptional(), $actualParameters[$i]->isOptional(), sprintf('Parameter being optional mismatched for method "%s".', $name));
-                        /* Not possible
-                        if ($expectedParameters[$i]->isOptional()) {
-                            echo $name . "\n\n-----\n";
-                            self::assertSame($expectedParameters[$i]->getDefaultValue(), $actualParameters[$i]->getDefaultValue());
-                        }
-                        */
                     }
                 }
             } catch (\PHPUnit_Framework_AssertionFailedError $e) {
@@ -82,11 +88,34 @@ final class MemcachedMockCompletenessTest extends PHPUnit_Framework_TestCase
             $failMessage = sprintf("Memcached version \"%s\"\n---------------------------------------\nFailures:\n---------------------------------------\n", phpversion('memcached'));
             /** @var \Exception $failure */
             foreach ($failures as $failure) {
-                $failMessage .= sprintf("%s\nLine: %d\n---------------------------------------\n", $failure->getMessage(), $failure->getLine());
+                $failMessage .= sprintf("\n---------------------------------------\n%s\n", $failure->toString());
+                $trace = $failure->getTrace();
+
+                foreach ($trace as $item) {
+                    if (!array_key_exists('file', $item) || $item['file'] !== __FILE__) {
+                        continue;
+                    }
+
+                    $failMessage .= sprintf("\n%s:%d", $item['file'], $item['line']);
+                }
             }
 
-            self::fail($failMessage);
+            self::fail($failMessage."\n---------------------------------------\n");
         }
+    }
+
+    private static function describeParameters(\ReflectionMethod $method)
+    {
+        $params = $method->getParameters();
+        $paramsFilter = [];
+        /** @var \ReflectionParameter $param */
+        foreach ($params as $param) {
+            $paramsFilter[$param->getPosition()] = sprintf('%s%s', $param->getName(), $param->isOptional() ? ' [optional]' : '');
+        }
+
+        ksort($paramsFilter);
+
+        return implode('","', $paramsFilter);
     }
 
     /**
