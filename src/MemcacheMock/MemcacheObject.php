@@ -36,9 +36,9 @@ class MemcacheObject
     private $expireTime;
 
     /**
-     * @param string   $key
-     * @param mixed    $value
-     * @param int|null $expireTime
+     * @param string $key
+     * @param mixed  $value
+     * @param int    $expireTime
      */
     public function __construct($key, $value, $expireTime)
     {
@@ -48,7 +48,7 @@ class MemcacheObject
     }
 
     /**
-     * @return int|null
+     * @return int
      */
     public function getExpireTime()
     {
@@ -56,7 +56,7 @@ class MemcacheObject
     }
 
     /**
-     * @param int|null $expireTime
+     * @param int $expireTime
      */
     public function setExpireTime($expireTime)
     {

@@ -60,7 +60,7 @@ final class MemcachedMockAssertsTest extends PHPUnit_Framework_TestCase
         $mock = new MemcachedMock();
         $mockReflection = new \ReflectionClass($mock);
         $allMethods = $mockReflection->getMethods();
-        $missing = array();
+        $missing = [];
         foreach ($allMethods as $method) {
             $methodName = $method->getName();
             if (0 !== strpos($methodName, 'assert')) {
@@ -84,81 +84,84 @@ final class MemcachedMockAssertsTest extends PHPUnit_Framework_TestCase
         $key256 = 'abcdefghijklmnopqrstuvwxyz1234567890abcdefghijklmnopqrstuvwxyz1234567890abcdefghijklmnopqrstuvwxyz1234567890abcdefghijklmnopqrstuvwxyz1234567890abcdefghijklmnopqrstuvwxyz1234567890abcdefghijklmnopqrstuvwxyz1234567890abcdefghijklmnopqrstuvwxyz1234567890abcd';
         $key257 = $key256.'e';
 
-        return array(
-            array('assertCallBackResult', array(true), true),
-            array('assertCallBackResult', array(false), true),
-            array('assertCallBackResult', array('test'), false, 'assertCallBackResult failed callback returned is bool, got "string".'),
-            array('assertCallBackResult', array(null, 'Custom message.'), false, 'assertCallBackResult failed callback returned is bool, got "NULL". Custom message.'),
-            array('assertConnected', array(false), false, 'assertConnected failed is connected.'),
-            array('assertDelay', array(0), true),
-            array('assertDelay', array(1), true),
-            array('assertDelay', array(time()), true),
-            array('assertDelay', array(-1), false, 'assertDelay failed delay is greater than or equals 0, got "-1".'),
-            array('assertDelay', array(null), false, 'assertDelay failed delay is an integer, got "NULL".'),
-            array('assertExpiration', array(1), true),
-            array('assertExpiration', array(null), true),
-            array('assertExpiration', array(new \stdClass()), false, 'assertExpiration failed expiration is an integer, got "stdClass".'),
-            array('assertIntValue', array(-1), true),
-            array('assertIntValue', array(0), true),
-            array('assertIntValue', array(1), true),
-            array('assertIntValue', array(100), true),
-            array('assertIntValue', array(null), false, 'assertIntValue failed value is an integer, got "NULL".'),
-            array('assertHasInCache', array('abc'), false, 'assertHasInCache failed key "abc" is in cache.'),
-            array('assertHasNotInCache', array('abc'), true),
-            array('assertHasNotInDeleteQueue', array('test'), true),
-            array('assertKey', array('key'), true),
-            array('assertKey', array(null), false, 'assertKey failed key is a string, got "NULL".'),
-            array('assertKey', array($key256), true),
-            array('assertKey', array($key257), false, sprintf('assertKey failed key (+ prefix) is less than 256 characters, got "%s" (257).', $key257)),
-            array('assertOffset', array(-1), true),
-            array('assertOffset', array(0), true),
-            array('assertOffset', array(1), true),
-            array('assertOffset', array(100), true),
-            array('assertOffset', array(null), false, 'assertOffset failed offset is an integer, got "NULL".'),
-            array('assertOption', array(0), true),
-            array('assertOption', array(-1002), true),
-            array('assertOption', array(null), false, 'assertOption failed option is an integer, got "NULL".'),
-            array('assertOption', array(''), false, 'assertOption failed option is an integer, got "string".'),
-            array('assertOption', array(true), false, 'assertOption failed option is an integer, got "boolean".'),
-            array('assertOption', array(new \stdClass()), false, 'assertOption failed option is an integer, got "stdClass".'),
-            array('assertOption', array(777), false, 'assertOption failed option is known, got "777".'),
-            array('assertOptionValue', array(1), true),
-            array('assertOptionValue', array(true), true),
-            array('assertOptionValue', array(false), true),
-            array('assertOptionValue', array(new \stdClass()), true),
-            array('assertOptionValue', array('test'), true),
-            array('assertOptionValue', array(array()), true),
-            array('assertOptionValue', array(array('1')), true),
-            array('assertOptionValue', array(xml_parser_create('')), false, 'assertOptionValue failed value is not a resource, got "xml".'),
-            array('assertPrefix', array('key'), true),
-            array('assertPrefix', array(null), false, 'assertPrefix failed prefix is a string, got "NULL".'),
-            array('assertPrefix', array($key256), false, sprintf('assertPrefix failed prefix is less than 128 characters, got "%s" (256).', $key256)),
-            array('assertScalarValue', array(1), true),
-            array('assertScalarValue', array(''), true),
-            array('assertScalarValue', array(null), false, 'assertScalarValue failed value is a scalar, got "NULL".'),
-            array('assertScalarValue', array(new \stdClass()), false, 'assertScalarValue failed value is a scalar, got "stdClass".'),
-            array('assertScalarValue', array(xml_parser_create('')), false, 'assertScalarValue failed value is a scalar, got "resource".'),
-            array('assertScalarValue', array(array()), false, 'assertScalarValue failed value is a scalar, got "array".'),
-            array('assertServer', array('127.0.0.1', 11211), true),
-            array('assertServer', array(null, 11211), false, 'assertServer failed host is a string, got "NULL".'),
-            array('assertServer', array('127.0.0.1', new \stdClass()), false, 'assertServer failed port is an integer, got "stdClass".'),
-            array('assertServer', array('127.0.0.1', -1), false, 'assertServer failed port is greater than 0, got "-1".'),
-            array('assertServer', array('127.0.0.1', 11211, 'abc'), false, 'assertServer failed weight is an integer, got "string".'),
-            array('assertServer', array('127.0.0.1', 11211, -1), false, 'assertServer failed weight greater than or equals 0, got "-1".'),
-            array('assertValue', array(1), true),
-            array('assertValue', array(true), true),
-            array('assertValue', array(false), true),
-            array('assertValue', array(new \stdClass()), true),
-            array('assertValue', array('test'), true),
-            array('assertValue', array(array()), true),
-            array('assertValue', array(array('1')), true),
-            array('assertValue', array(xml_parser_create('')), false, 'assertValue failed value is not a resource, got "xml".'),
-        );
+        return [
+            ['assertArrayValue', [true], false, 'assertArrayValue failed value is an array, got "boolean".'],
+            ['assertArrayValue', [[]], true],
+            ['assertCallBackResult', [true], true],
+            ['assertCallBackResult', [false], true],
+            ['assertCallBackResult', ['test'], false, 'assertCallBackResult failed callback returned is bool, got "string".'],
+            ['assertCallBackResult', [null, 'Custom message.'], false, 'assertCallBackResult failed callback returned is bool, got "NULL". Custom message.'],
+            ['assertConnected', [false], false, 'assertConnected failed is connected.'],
+            ['assertDelay', [0], true],
+            ['assertDelay', [1], true],
+            ['assertDelay', [time()], true],
+            ['assertDelay', [-1], false, 'assertDelay failed delay is greater than or equals 0, got "-1".'],
+            ['assertDelay', [null], false, 'assertDelay failed delay is an integer, got "NULL".'],
+            ['assertExpiration', [1], true],
+            ['assertExpiration', [null], true],
+            ['assertExpiration', [new \stdClass()], false, 'assertExpiration failed expiration is an integer >= 0 or null, got "stdClass".'],
+            ['assertExpiration', [-1], false, 'assertExpiration failed expiration is an integer >= 0 or null, got "-1".'],
+            ['assertIntValue', [-1], true],
+            ['assertIntValue', [0], true],
+            ['assertIntValue', [1], true],
+            ['assertIntValue', [100], true],
+            ['assertIntValue', [null], false, 'assertIntValue failed value is an integer, got "NULL".'],
+            ['assertHasInCache', ['abc'], false, 'assertHasInCache failed key "abc" is in cache.'],
+            ['assertHasNotInCache', ['abc'], true],
+            ['assertHasNotInDeleteQueue', ['test'], true],
+            ['assertKey', ['key'], true],
+            ['assertKey', [null], false, 'assertKey failed key is a string, got "NULL".'],
+            ['assertKey', [$key256], true],
+            ['assertKey', [$key257], false, sprintf('assertKey failed key is less than 256 characters, got "%s" (257).', $key257)],
+            ['assertOffset', [-1], true],
+            ['assertOffset', [0], true],
+            ['assertOffset', [1], true],
+            ['assertOffset', [100], true],
+            ['assertOffset', [null], false, 'assertOffset failed offset is an integer, got "NULL".'],
+            ['assertOption', [0], true],
+            ['assertOption', [-1002], true],
+            ['assertOption', [null], false, 'assertOption failed option is an integer, got "NULL".'],
+            ['assertOption', [''], false, 'assertOption failed option is an integer, got "string".'],
+            ['assertOption', [true], false, 'assertOption failed option is an integer, got "boolean".'],
+            ['assertOption', [new \stdClass()], false, 'assertOption failed option is an integer, got "stdClass".'],
+            ['assertOption', [777], false, 'assertOption failed option is known, got "777".'],
+            ['assertOptionValue', [1], true],
+            ['assertOptionValue', [true], true],
+            ['assertOptionValue', [false], true],
+            ['assertOptionValue', [new \stdClass()], true],
+            ['assertOptionValue', ['test'], true],
+            ['assertOptionValue', [[]], true],
+            ['assertOptionValue', [['1']], true],
+            ['assertOptionValue', [xml_parser_create('')], false, 'assertOptionValue failed value is not a resource, got "xml".'],
+            ['assertPrefix', ['key'], true],
+            ['assertPrefix', [null], false, 'assertPrefix failed prefix is a string, got "NULL".'],
+            ['assertPrefix', [$key256], false, sprintf('assertPrefix failed prefix is less than 128 characters, got "%s" (256).', $key256)],
+            ['assertScalarValue', [1], true],
+            ['assertScalarValue', [''], true],
+            ['assertScalarValue', [null], false, 'assertScalarValue failed value is a scalar, got "NULL".'],
+            ['assertScalarValue', [new \stdClass()], false, 'assertScalarValue failed value is a scalar, got "stdClass".'],
+            ['assertScalarValue', [xml_parser_create('')], false, 'assertScalarValue failed value is a scalar, got "resource".'],
+            ['assertScalarValue', [[]], false, 'assertScalarValue failed value is a scalar, got "array".'],
+            ['assertServer', ['127.0.0.1', 11211, 0], true],
+            ['assertServer', [null, 11211, 0], false, 'assertServer failed host is a string, got "NULL".'],
+            ['assertServer', ['127.0.0.1', new \stdClass(), 0], false, 'assertServer failed port is an integer, got "stdClass".'],
+            ['assertServer', ['127.0.0.1', -1, 0], false, 'assertServer failed port is greater than 0, got "-1".'],
+            ['assertServer', ['127.0.0.1', 11211, 'abc'], false, 'assertServer failed weight is an integer, got "string".'],
+            ['assertServer', ['127.0.0.1', 11211, -1], false, 'assertServer failed weight greater than or equals 0, got "-1".'],
+            ['assertValue', [1], true],
+            ['assertValue', [true], true],
+            ['assertValue', [false], true],
+            ['assertValue', [new \stdClass()], true],
+            ['assertValue', ['test'], true],
+            ['assertValue', [[]], true],
+            ['assertValue', [['1']], true],
+            ['assertValue', [xml_parser_create('')], false, 'assertValue failed value is not a resource, got "xml".'],
+        ];
     }
 
     /**
      * @expectedException GeckoPackages\MemcacheMock\MemcachedMockAssertException
-     * @expectedExceptionMessage assertHasNotInCache failed key "a" is not in cache.
+     * @expectedExceptionMessageRegExp /^assertHasNotInCache failed key "a" is not in cache.$/
      */
     public function testAssertHasNotInCache()
     {
@@ -170,7 +173,7 @@ final class MemcachedMockAssertsTest extends PHPUnit_Framework_TestCase
         $mockReflection = new \ReflectionClass($mock);
         $method = $mockReflection->getMethod('assertHasNotInCache');
         $method->setAccessible(true);
-        $method->invokeArgs($mock, array('a'));
+        $method->invokeArgs($mock, ['a']);
     }
 
     public function testAssertHasInCache()
@@ -183,7 +186,7 @@ final class MemcachedMockAssertsTest extends PHPUnit_Framework_TestCase
         $mockReflection = new \ReflectionClass($mock);
         $method = $mockReflection->getMethod('assertHasInCache');
         $method->setAccessible(true);
-        $this->assertTrue($method->invokeArgs($mock, array('a')));
+        $this->assertTrue($method->invokeArgs($mock, ['a']));
     }
 
     public function testAssertHasNotInDeleteQueue()
@@ -198,7 +201,28 @@ final class MemcachedMockAssertsTest extends PHPUnit_Framework_TestCase
         $mockReflection = new \ReflectionClass($mock);
         $method = $mockReflection->getMethod('assertHasNotInDeleteQueue');
         $method->setAccessible(true);
-        $this->assertFalse($method->invokeArgs($mock, array('a')));
+        $this->assertFalse($method->invokeArgs($mock, ['a']));
+    }
+
+    /**
+     * @expectedException GeckoPackages\MemcacheMock\MemcachedMockAssertException
+     * @expectedExceptionMessageRegExp /^assertKey failed key with prefix is less than 256 characters, got "_prefix_test_prefix_test_prefix_test_prefix_test_prefix_test_aaabbbcccdddeeefffggghhhhiiijjjjkkklllmmmnnnooopppqqqrrrssstttuuuvvvwwwxxxyyyzzzaaabbbcccdddeeefffggghhhhiiijjjjkkklllmmmnnnooopppqqqrrrssstttuuuvvvwwwxxxyyyzzzaaabbbcccdddeeefffggghhhhiiijjjjkkklllmmmnnnooopppqqqrrrssstttuuuvvvwwwxxxyyyzzz" \(301\).$/
+     */
+    public function testAssertKeyWithPrefixSet()
+    {
+        $prefix = '_prefix_test_prefix_test_prefix_test_prefix_test_prefix_test_';
+        $mock = new MemcachedMock();
+        $mock->setThrowExceptionsOnFailure(true);
+        $mock->setOption(-1002, $prefix);
+
+        $mockReflection = new \ReflectionClass($mock);
+        $method = $mockReflection->getMethod('getPrefix');
+        $method->setAccessible(true);
+        $this->assertSame($prefix, $method->invokeArgs($mock, []));
+
+        $method = $mockReflection->getMethod('assertKey');
+        $method->setAccessible(true);
+        $method->invokeArgs($mock, ['aaabbbcccdddeeefffggghhhhiiijjjjkkklllmmmnnnooopppqqqrrrssstttuuuvvvwwwxxxyyyzzzaaabbbcccdddeeefffggghhhhiiijjjjkkklllmmmnnnooopppqqqrrrssstttuuuvvvwwwxxxyyyzzzaaabbbcccdddeeefffggghhhhiiijjjjkkklllmmmnnnooopppqqqrrrssstttuuuvvvwwwxxxyyyzzz']);
     }
 
     public function testMultipleAssertFailures()
@@ -211,11 +235,11 @@ final class MemcachedMockAssertsTest extends PHPUnit_Framework_TestCase
         $mockReflection = new \ReflectionClass($mock);
         $method = $mockReflection->getMethod('assertConnected');
         $method->setAccessible(true);
-        $this->assertFalse($method->invokeArgs($mock, array()));
+        $this->assertFalse($method->invokeArgs($mock, []));
 
         $method = $mockReflection->getMethod('assertScalarValue');
         $method->setAccessible(true);
-        $this->assertFalse($method->invokeArgs($mock, array(array())));
+        $this->assertFalse($method->invokeArgs($mock, [[]]));
 
         $mock->setThrowExceptionsOnFailure(true);
 

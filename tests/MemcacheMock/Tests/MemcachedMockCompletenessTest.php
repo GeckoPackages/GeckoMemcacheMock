@@ -23,7 +23,7 @@ final class MemcachedMockCompletenessTest extends PHPUnit_Framework_TestCase
     public static function testMemcachedMockCompleteness()
     {
         $mockReflection = new ReflectionClass('GeckoPackages\MemcacheMock\MemcachedMock');
-        $mockMethodsFiltered = array();
+        $mockMethodsFiltered = [];
         foreach ($mockReflection->getMethods() as $mockMethod) {
             if ('GeckoPackages\MemcacheMock\MemcachedMock' === $mockMethod->getDeclaringClass()->getName()) {
                 $mockMethodsFiltered[] = $mockMethod;
@@ -43,33 +43,79 @@ final class MemcachedMockCompletenessTest extends PHPUnit_Framework_TestCase
         $expected = self::transformMethodList($expected);
         $actual = self::transformMethodList($actual);
 
+        $failures = [];
         foreach ($expected as $name => $expectedMethod) {
-            if (!array_key_exists($name, $actual)) {
-                self::fail(sprintf('Method name "%s" missing in list.', $name));
-            }
-
-            if ($name === 'append' || $name === 'appendByKey' || $name === 'prepend'  || $name === 'prependByKey') {
-                continue; // what is wrong with these?
-            }
-
-            $actualMethod = $actual[$name];
-            self::assertSame($expectedMethod->getNumberOfParameters(), $actualMethod->getNumberOfParameters(), sprintf('Number of parameters mismatched for method "%s".', $name));
-            self::assertSame($expectedMethod->getNumberOfRequiredParameters(), $actualMethod->getNumberOfRequiredParameters(), sprintf('Number of required parameters mismatched for method "%s".', $name));
-            if ($expectedMethod->getNumberOfParameters() > 0) {
-                $expectedParameters = $expectedMethod->getParameters();
-                $actualParameters = $actualMethod->getParameters();
-                for ($i = 0, $count = count($expectedParameters); $i < $count - 1; ++$i) {
-                    self::assertSame($expectedParameters[$i]->getName(), $actualParameters[$i]->getName(), sprintf('Parameter naming mismatched for method "%s".', $name));
-                    self::assertSame($expectedParameters[$i]->isOptional(), $actualParameters[$i]->isOptional(), sprintf('Parameter being optional mismatched for method "%s".', $name));
-                    /* Not possible
-                    if ($expectedParameters[$i]->isOptional()) {
-                        echo $name . "\n\n-----\n";
-                        self::assertSame($expectedParameters[$i]->getDefaultValue(), $actualParameters[$i]->getDefaultValue());
-                    }
-                    */
+            try {
+                if (!array_key_exists($name, $actual)) {
+                    self::fail(sprintf('Method name "%s" missing in list.', $name));
                 }
+
+                if ($name === 'append' || $name === 'appendByKey' || $name === 'prepend' || $name === 'prependByKey') {
+                    continue; // what is wrong with these?
+                }
+
+                $actualMethod = $actual[$name];
+                if ($expectedMethod->getNumberOfParameters() !== $actualMethod->getNumberOfParameters()) {
+                    self::fail(sprintf(
+                        "Number of parameters mismatched for method \"%s\".\nExpected:\n\"%s\"\nGot:\n\"%s\"",
+                        $name, self::describeParameters($expectedMethod), self::describeParameters($actualMethod)
+                    ));
+                }
+
+                if ($expectedMethod->getNumberOfRequiredParameters() !== $actualMethod->getNumberOfRequiredParameters()) {
+                    self::fail(sprintf(
+                        "Number of required parameters mismatched for method \"%s\".\nExpected:\n\"%s\"\nGot:\n\"%s\"",
+                        $name, self::describeParameters($expectedMethod), self::describeParameters($actualMethod)
+                    ));
+                }
+
+                if ($expectedMethod->getNumberOfParameters() > 0) {
+                    $expectedParameters = $expectedMethod->getParameters();
+                    $actualParameters = $actualMethod->getParameters();
+                    for ($i = 0, $count = count($expectedParameters); $i < $count - 1; ++$i) {
+                        self::assertSame($expectedParameters[$i]->getName(), $actualParameters[$i]->getName(), sprintf('Parameter naming mismatched for method "%s".', $name));
+                        self::assertSame($expectedParameters[$i]->isOptional(), $actualParameters[$i]->isOptional(), sprintf('Parameter being optional mismatched for method "%s".', $name));
+                    }
+                }
+            } catch (\PHPUnit_Framework_AssertionFailedError $e) {
+                $failures[] = $e;
+            } catch (\PHPUnit_Framework_ExpectationFailedException $e) {
+                $failures[] = $e;
             }
         }
+
+        if (count($failures)) {
+            $failMessage = sprintf("Memcached version \"%s\"\n---------------------------------------\nFailures:\n---------------------------------------\n", phpversion('memcached'));
+            /** @var \Exception $failure */
+            foreach ($failures as $failure) {
+                $failMessage .= sprintf("\n---------------------------------------\n%s\n", $failure->toString());
+                $trace = $failure->getTrace();
+
+                foreach ($trace as $item) {
+                    if (!array_key_exists('file', $item) || $item['file'] !== __FILE__) {
+                        continue;
+                    }
+
+                    $failMessage .= sprintf("\n%s:%d", $item['file'], $item['line']);
+                }
+            }
+
+            self::fail($failMessage."\n---------------------------------------\n");
+        }
+    }
+
+    private static function describeParameters(\ReflectionMethod $method)
+    {
+        $params = $method->getParameters();
+        $paramsFilter = [];
+        /** @var \ReflectionParameter $param */
+        foreach ($params as $param) {
+            $paramsFilter[$param->getPosition()] = sprintf('%s%s', $param->getName(), $param->isOptional() ? ' [optional]' : '');
+        }
+
+        ksort($paramsFilter);
+
+        return implode('","', $paramsFilter);
     }
 
     /**
@@ -79,7 +125,7 @@ final class MemcachedMockCompletenessTest extends PHPUnit_Framework_TestCase
      */
     private static function transformMethodList(array $list)
     {
-        $transformed = array();
+        $transformed = [];
         foreach ($list as $method) {
             $transformed[$method->getName()] = $method;
         }
