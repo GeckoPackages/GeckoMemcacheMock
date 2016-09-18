@@ -161,7 +161,7 @@ final class MemcachedMockAssertsTest extends PHPUnit_Framework_TestCase
 
     /**
      * @expectedException GeckoPackages\MemcacheMock\MemcachedMockAssertException
-     * @expectedExceptionMessageRegEx /^assertHasNotInCache failed key "a" is not in cache.$/
+     * @expectedExceptionMessageRegExp /^assertHasNotInCache failed key "a" is not in cache.$/
      */
     public function testAssertHasNotInCache()
     {
