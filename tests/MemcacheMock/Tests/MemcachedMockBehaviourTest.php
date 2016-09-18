@@ -23,7 +23,7 @@ final class MemcachedMockBehaviourTest extends PHPUnit_Framework_TestCase
 {
     /**
      * @expectedException GeckoPackages\MemcacheMock\MemcachedMockAssertException
-     * @expectedExceptionMessageRegEx /^assertConnected failed is connected.$/
+     * @expectedExceptionMessageRegExp /^assertConnected failed is connected.$/
      */
     public function testAssertFailToException()
     {
@@ -468,7 +468,7 @@ final class MemcachedMockBehaviourTest extends PHPUnit_Framework_TestCase
 
     /**
      * @expectedException \UnexpectedValueException
-     * @expectedExceptionMessageRegEx /^assertOption failed option is known, got "667".$/
+     * @expectedExceptionMessageRegExp /^assertOption failed option is known, got "667".$/
      */
     public function testOptionException()
     {
@@ -738,7 +738,7 @@ final class MemcachedMockBehaviourTest extends PHPUnit_Framework_TestCase
 
     /**
      * @expectedException \UnexpectedValueException
-     * @expectedExceptionMessageRegEx /^Unknown result failed code "555", supply an error message.$/
+     * @expectedExceptionMessageRegExp /^Unknown result failed code "555", supply an error message.$/
      */
     public function testMissingResultErrorMessage()
     {
