@@ -20,7 +20,7 @@
  */
 final class MemcachedMockCompletenessTest extends PHPUnit_Framework_TestCase
 {
-    public static function testMemcachedMockCompleteness()
+    public function testMemcachedMockCompleteness()
     {
         $mockReflection = new ReflectionClass('GeckoPackages\MemcacheMock\MemcachedMock');
         $mockMethodsFiltered = [];
@@ -31,14 +31,14 @@ final class MemcachedMockCompletenessTest extends PHPUnit_Framework_TestCase
         }
 
         $reflection = new ReflectionClass('Memcached');
-        self::assertMethodList($reflection->getMethods(), $mockMethodsFiltered);
+        $this->assertMethodList($reflection->getMethods(), $mockMethodsFiltered);
     }
 
     /**
      * @param ReflectionMethod[] $expected
      * @param ReflectionMethod[] $actual
      */
-    private static function assertMethodList(array $expected, array $actual)
+    private function assertMethodList(array $expected, array $actual)
     {
         $expected = self::transformMethodList($expected);
         $actual = self::transformMethodList($actual);
@@ -47,7 +47,7 @@ final class MemcachedMockCompletenessTest extends PHPUnit_Framework_TestCase
         foreach ($expected as $name => $expectedMethod) {
             try {
                 if (!array_key_exists($name, $actual)) {
-                    self::fail(sprintf('Method name "%s" missing in list.', $name));
+                    $this->fail(sprintf('Method name "%s" missing in list.', $name));
                 }
 
                 if ($name === 'append' || $name === 'appendByKey' || $name === 'prepend' || $name === 'prependByKey') {
@@ -56,14 +56,14 @@ final class MemcachedMockCompletenessTest extends PHPUnit_Framework_TestCase
 
                 $actualMethod = $actual[$name];
                 if ($expectedMethod->getNumberOfParameters() !== $actualMethod->getNumberOfParameters()) {
-                    self::fail(sprintf(
+                    $this->fail(sprintf(
                         "Number of parameters mismatched for method \"%s\".\nExpected:\n\"%s\"\nGot:\n\"%s\"",
                         $name, self::describeParameters($expectedMethod), self::describeParameters($actualMethod)
                     ));
                 }
 
                 if ($expectedMethod->getNumberOfRequiredParameters() !== $actualMethod->getNumberOfRequiredParameters()) {
-                    self::fail(sprintf(
+                    $this->fail(sprintf(
                         "Number of required parameters mismatched for method \"%s\".\nExpected:\n\"%s\"\nGot:\n\"%s\"",
                         $name, self::describeParameters($expectedMethod), self::describeParameters($actualMethod)
                     ));
@@ -73,8 +73,8 @@ final class MemcachedMockCompletenessTest extends PHPUnit_Framework_TestCase
                     $expectedParameters = $expectedMethod->getParameters();
                     $actualParameters = $actualMethod->getParameters();
                     for ($i = 0, $count = count($expectedParameters); $i < $count - 1; ++$i) {
-                        self::assertSame($expectedParameters[$i]->getName(), $actualParameters[$i]->getName(), sprintf('Parameter naming mismatched for method "%s".', $name));
-                        self::assertSame($expectedParameters[$i]->isOptional(), $actualParameters[$i]->isOptional(), sprintf('Parameter being optional mismatched for method "%s".', $name));
+                        $this->assertSame($expectedParameters[$i]->getName(), $actualParameters[$i]->getName(), sprintf('Parameter naming mismatched for method "%s".', $name));
+                        $this->assertSame($expectedParameters[$i]->isOptional(), $actualParameters[$i]->isOptional(), sprintf('Parameter being optional mismatched for method "%s".', $name));
                     }
                 }
             } catch (\PHPUnit_Framework_AssertionFailedError $e) {
@@ -85,7 +85,8 @@ final class MemcachedMockCompletenessTest extends PHPUnit_Framework_TestCase
         }
 
         if (count($failures)) {
-            $failMessage = sprintf("Memcached version \"%s\"\n---------------------------------------\nFailures:\n---------------------------------------\n", phpversion('memcached'));
+            $memcachedVersion = phpversion('memcached');
+            $failMessage = sprintf("Memcached version \"%s\"\n---------------------------------------\nFailures:\n---------------------------------------\n", $memcachedVersion);
             /** @var \Exception $failure */
             foreach ($failures as $failure) {
                 $failMessage .= sprintf("\n---------------------------------------\n%s\n", $failure->toString());
@@ -100,7 +101,13 @@ final class MemcachedMockCompletenessTest extends PHPUnit_Framework_TestCase
                 }
             }
 
-            self::fail($failMessage."\n---------------------------------------\n");
+            if (1 !== preg_match('#^\d+.\d+(.\d+)?$#', $memcachedVersion)) {
+                $this->markTestSkipped(sprintf("Memcached %s is not a stabled one, failures on it:\n%s", $memcachedVersion, $failMessage));
+
+                return;
+            }
+
+            $this->fail($failMessage."\n---------------------------------------\n");
         }
     }
 
