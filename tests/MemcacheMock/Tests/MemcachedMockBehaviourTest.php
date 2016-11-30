@@ -52,7 +52,7 @@ final class MemcachedMockBehaviourTest extends PHPUnit_Framework_TestCase
     }
 
     /**
-     * @expectedException GeckoPackages\MemcacheMock\MemcachedMockAssertException
+     * @expectedException \GeckoPackages\MemcacheMock\MemcachedMockAssertException
      * @expectedExceptionMessageRegExp /^assertConnected failed is connected.$/
      */
     public function testAssertFailToException()

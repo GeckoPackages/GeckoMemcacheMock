@@ -160,7 +160,7 @@ final class MemcachedMockAssertsTest extends PHPUnit_Framework_TestCase
     }
 
     /**
-     * @expectedException GeckoPackages\MemcacheMock\MemcachedMockAssertException
+     * @expectedException \GeckoPackages\MemcacheMock\MemcachedMockAssertException
      * @expectedExceptionMessageRegExp /^assertHasNotInCache failed key "a" is not in cache.$/
      */
     public function testAssertHasNotInCache()
@@ -205,7 +205,7 @@ final class MemcachedMockAssertsTest extends PHPUnit_Framework_TestCase
     }
 
     /**
-     * @expectedException GeckoPackages\MemcacheMock\MemcachedMockAssertException
+     * @expectedException \GeckoPackages\MemcacheMock\MemcachedMockAssertException
      * @expectedExceptionMessageRegExp /^assertKey failed key with prefix is less than 256 characters, got "_prefix_test_prefix_test_prefix_test_prefix_test_prefix_test_aaabbbcccdddeeefffggghhhhiiijjjjkkklllmmmnnnooopppqqqrrrssstttuuuvvvwwwxxxyyyzzzaaabbbcccdddeeefffggghhhhiiijjjjkkklllmmmnnnooopppqqqrrrssstttuuuvvvwwwxxxyyyzzzaaabbbcccdddeeefffggghhhhiiijjjjkkklllmmmnnnooopppqqqrrrssstttuuuvvvwwwxxxyyyzzz" \(301\).$/
      */
     public function testAssertKeyWithPrefixSet()
