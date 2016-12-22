@@ -12,7 +12,7 @@
 namespace GeckoPackages\MemcacheMock;
 
 /**
- * When configured to do so the MemcachedMock thrown this if an assert fails.
+ * The MemcachedMock throws instances of this if an assert fails (when configured to).
  *
  * @author SpacePossum
  */

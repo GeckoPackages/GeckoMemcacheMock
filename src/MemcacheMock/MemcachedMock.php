@@ -346,38 +346,6 @@ class MemcachedMock
         return true;
     }
 
-    private function setOptionImpl($option, $value)
-    {
-        if (!$this->assertOption($option)) {
-            return false;
-        }
-
-        if (!$this->assertOptionValue($value)) {
-            //if not int, memcached triggers error and returns null and not false as documented
-            return false;
-        }
-
-        switch ($option) {
-            case -1002: // \Memcached::OPT_PREFIX_KEY
-                if (!$this->assertPrefix($value)) {
-                    return false;
-                }
-
-                break;
-            case 19:    // \Memcached::OPT_SEND_TIMEOUT
-            case 20:    // \Memcached::OPT_RECV_TIMEOUT
-                if (!$this->assertIntValue($value, sprintf('Invalid value for option "%d".', $option))) {
-                    return false;
-                }
-
-                break;
-        }
-
-        $this->options[$option] = $value;
-
-        return true;
-    }
-
     //--------------------------------------------------------
     // misc
     //--------------------------------------------------------
@@ -682,34 +650,6 @@ class MemcachedMock
         }
 
         $this->stopMethod();
-
-        return true;
-    }
-
-    private function deleteImpl($key, $time = 0)
-    {
-        if (!$this->assertConnected()) {
-            return false;
-        }
-
-        if (!$this->assertDelay($time)) {
-            return false;
-        }
-
-        if (!$this->assertKey($key)) {
-            return false;
-        }
-
-        $key = $this->getPrefix().$key;
-
-        if (!$this->isInCache($key) && !$this->isInDeleteQueue($key)) {
-            $this->setResultFailed(16);
-
-            return false;
-        }
-
-        $this->deleteFromCache($key, $time);
-        $this->setResultOK();
 
         return true;
     }
@@ -1022,28 +962,6 @@ class MemcachedMock
         return 1 === $result;
     }
 
-    private function setImpl($key, $value, $expiration = null)
-    {
-        if (!$this->assertKey($key)) {
-            return false;
-        }
-
-        $key = $this->getPrefix().$key;
-
-        if (!$this->assertValue($value)) {
-            return false;
-        }
-
-        if (!$this->assertExpiration($expiration)) {
-            return false;
-        }
-
-        $this->storeValueInCache($key, $value, $expiration);
-        $this->setResultOK();
-
-        return true;
-    }
-
     public function touch($key, $expiration)
     {
         if (null !== $this->logger) {
@@ -1197,6 +1115,88 @@ class MemcachedMock
     //--------------------------------------------------------
     // internals
     //--------------------------------------------------------
+
+    private function setOptionImpl($option, $value)
+    {
+        if (!$this->assertOption($option)) {
+            return false;
+        }
+
+        if (!$this->assertOptionValue($value)) {
+            //if not int, memcached triggers error and returns null and not false as documented
+            return false;
+        }
+
+        switch ($option) {
+            case -1002: // \Memcached::OPT_PREFIX_KEY
+                if (!$this->assertPrefix($value)) {
+                    return false;
+                }
+
+                break;
+            case 19:    // \Memcached::OPT_SEND_TIMEOUT
+            case 20:    // \Memcached::OPT_RECV_TIMEOUT
+                if (!$this->assertIntValue($value, sprintf('Invalid value for option "%d".', $option))) {
+                    return false;
+                }
+
+                break;
+        }
+
+        $this->options[$option] = $value;
+
+        return true;
+    }
+
+    private function deleteImpl($key, $time = 0)
+    {
+        if (!$this->assertConnected()) {
+            return false;
+        }
+
+        if (!$this->assertDelay($time)) {
+            return false;
+        }
+
+        if (!$this->assertKey($key)) {
+            return false;
+        }
+
+        $key = $this->getPrefix().$key;
+
+        if (!$this->isInCache($key) && !$this->isInDeleteQueue($key)) {
+            $this->setResultFailed(16);
+
+            return false;
+        }
+
+        $this->deleteFromCache($key, $time);
+        $this->setResultOK();
+
+        return true;
+    }
+
+    private function setImpl($key, $value, $expiration = null)
+    {
+        if (!$this->assertKey($key)) {
+            return false;
+        }
+
+        $key = $this->getPrefix().$key;
+
+        if (!$this->assertValue($value)) {
+            return false;
+        }
+
+        if (!$this->assertExpiration($expiration)) {
+            return false;
+        }
+
+        $this->storeValueInCache($key, $value, $expiration);
+        $this->setResultOK();
+
+        return true;
+    }
 
     private function checkForDelayedDelete($key)
     {
