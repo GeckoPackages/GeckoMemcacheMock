@@ -166,7 +166,7 @@ final class MemcachedMockAssertsTest extends \PHPUnit_Framework_TestCase
     public function testAssertHasNotInCache()
     {
         $this->expectException('\GeckoPackages\MemcacheMock\MemcachedMockAssertException');
-        $this->expectExceptionMessageRegExp('#^assertHasNotInCache failed key "a" is not in cache.$#');
+        $this->expectExceptionMessageRegExp('#^assertHasNotInCache failed key "a" is not in cache\.$#');
 
         $mock = new MemcachedMock();
         $mock->setThrowExceptionsOnFailure(true);
@@ -209,7 +209,7 @@ final class MemcachedMockAssertsTest extends \PHPUnit_Framework_TestCase
 
     /**
      * @expectedException \GeckoPackages\MemcacheMock\MemcachedMockAssertException
-     * @expectedExceptionMessageRegExp /^assertKey failed key with prefix is less than 256 characters, got "_prefix_test_prefix_test_prefix_test_prefix_test_prefix_test_aaabbbcccdddeeefffggghhhhiiijjjjkkklllmmmnnnooopppqqqrrrssstttuuuvvvwwwxxxyyyzzzaaabbbcccdddeeefffggghhhhiiijjjjkkklllmmmnnnooopppqqqrrrssstttuuuvvvwwwxxxyyyzzzaaabbbcccdddeeefffggghhhhiiijjjjkkklllmmmnnnooopppqqqrrrssstttuuuvvvwwwxxxyyyzzz" \(301\).$/
+     * @expectedExceptionMessageRegExp /^assertKey failed key with prefix is less than 256 characters, got "_prefix_test_prefix_test_prefix_test_prefix_test_prefix_test_aaabbbcccdddeeefffggghhhhiiijjjjkkklllmmmnnnooopppqqqrrrssstttuuuvvvwwwxxxyyyzzzaaabbbcccdddeeefffggghhhhiiijjjjkkklllmmmnnnooopppqqqrrrssstttuuuvvvwwwxxxyyyzzzaaabbbcccdddeeefffggghhhhiiijjjjkkklllmmmnnnooopppqqqrrrssstttuuuvvvwwwxxxyyyzzz" \(301\)\.$/
      */
     public function testAssertKeyWithPrefixSet()
     {

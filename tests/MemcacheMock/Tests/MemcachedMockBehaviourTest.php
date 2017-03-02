@@ -20,7 +20,7 @@ use GeckoPackages\MemcacheMock\MemcachedMockAssertException;
  *
  * @internal
  */
-final class MemcachedMockBehaviourTest extends PHPUnit_Framework_TestCase
+final class MemcachedMockBehaviourTest extends \PHPUnit_Framework_TestCase
 {
     public function testGetSetPrefix()
     {
@@ -38,7 +38,7 @@ final class MemcachedMockBehaviourTest extends PHPUnit_Framework_TestCase
     public function testSetInvalidPrefixType()
     {
         $this->expectException(\InvalidArgumentException::class);
-        $this->expectExceptionMessageRegExp('#^Prefix must be a string, got "integer".$#');
+        $this->expectExceptionMessageRegExp('#^Prefix must be a string, got "integer"\.$#');
 
         $mock = new MemcachedMock();
         $mock->setPrefix(123);
@@ -50,7 +50,7 @@ final class MemcachedMockBehaviourTest extends PHPUnit_Framework_TestCase
     public function testSetInvalidPrefix()
     {
         $this->expectException(\InvalidArgumentException::class);
-        $this->expectExceptionMessageRegExp('#^Max. length of prefix is 128, got "132".$#');
+        $this->expectExceptionMessageRegExp('#^Max. length of prefix is 128, got "132"\.$#');
 
         $mock = new MemcachedMock();
         $mock->setPrefix('abcabcabcabcabcabcabcabcabcabcabcabcabcabcabcabcaabcabcabcabcabcabcabcabcabcabcabcabcabcabcabcabcaabcabcababcabcabcabcabcabcabcassss');
@@ -62,7 +62,7 @@ final class MemcachedMockBehaviourTest extends PHPUnit_Framework_TestCase
     public function testAssertFailToException()
     {
         $this->expectException(MemcachedMockAssertException::class);
-        $this->expectExceptionMessageRegExp('#^assertConnected failed is connected.$#');
+        $this->expectExceptionMessageRegExp('#^assertConnected failed is connected\.$#');
 
         $mock = new MemcachedMock();
         $mock->setThrowExceptionsOnFailure(true);
@@ -509,7 +509,7 @@ final class MemcachedMockBehaviourTest extends PHPUnit_Framework_TestCase
     public function testOptionException()
     {
         $this->expectException(\UnexpectedValueException::class);
-        $this->expectExceptionMessageRegExp('#^assertOption failed option is known, got "667".$#');
+        $this->expectExceptionMessageRegExp('#^assertOption failed option is known, got "667"\.$#');
 
         $mock = $this->getMemcachedMock();
         $mock->setOptions([667 => 123]);
@@ -781,7 +781,7 @@ final class MemcachedMockBehaviourTest extends PHPUnit_Framework_TestCase
     public function testMissingResultErrorMessage()
     {
         $this->expectException(\UnexpectedValueException::class);
-        $this->expectExceptionMessageRegExp('#^Unknown result failed code "555", supply an error message.$#');
+        $this->expectExceptionMessageRegExp('#^Unknown result failed code "555", supply an error message\.$#');
 
         $mock = new MemcachedMock();
         $mockReflection = new \ReflectionClass($mock);

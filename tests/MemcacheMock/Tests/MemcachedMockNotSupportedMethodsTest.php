@@ -18,7 +18,7 @@ use GeckoPackages\MemcacheMock\MemcachedMock;
  *
  * @internal
  */
-final class MemcachedMockNotSupportedMethodsTest extends PHPUnit_Framework_TestCase
+final class MemcachedMockNotSupportedMethodsTest extends \PHPUnit_Framework_TestCase
 {
     /**
      * @param string $method

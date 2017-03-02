@@ -17,7 +17,7 @@ use Symfony\Component\Stopwatch\Stopwatch;
  *
  * @internal
  */
-final class MemcachedLoggerTest extends PHPUnit_Framework_TestCase
+final class MemcachedLoggerTest extends \PHPUnit_Framework_TestCase
 {
     public function testLogger()
     {
@@ -35,11 +35,11 @@ final class MemcachedLoggerTest extends PHPUnit_Framework_TestCase
         $event = $stopWatch->getEvent('memcached');
         $this->assertCount(1, $event->getPeriods());
 
-        if (method_exists($stopWatch, 'getSections')) {
-            $sections = $stopWatch->getSections();
-            $this->assertCount(1, $sections);
-        } else {
+        if (!method_exists($stopWatch, 'getSections')) {
             $this->markTestSkipped('Requires symfony/stopwatch 2.6 or higher.');
         }
+
+        $sections = $stopWatch->getSections();
+        $this->assertCount(1, $sections);
     }
 }
