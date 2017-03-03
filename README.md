@@ -9,7 +9,7 @@ The mock is written in PHP as class and is therefor not persistent beyond the ex
 
 ### Requirements
 
-PHP 5.4 for the Callable type hint.
+PHP 5.4 (PHP 7 supported). Optional HHVM support >= 3.9.
 
 ### Install
 
@@ -162,3 +162,15 @@ The mock has the following additional methods that are not on the Memcached clas
 ### License
 
 The project is released under the MIT license, see the LICENSE file.
+
+### Contributions
+
+Contributions are welcome!
+
+### Semantic Versioning
+
+This project follows [Semantic Versioning](http://semver.org/).
+
+<sub>Kindly note:
+We do not keep a backwards compatible promise on the tests and tooling (such as document generation) of the project itself
+nor the content and/or format of exception messages.</sub>

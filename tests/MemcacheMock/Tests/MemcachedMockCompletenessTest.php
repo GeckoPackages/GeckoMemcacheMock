@@ -18,7 +18,7 @@
  *
  * @requires extension memcached
  */
-final class MemcachedMockCompletenessTest extends PHPUnit_Framework_TestCase
+final class MemcachedMockCompletenessTest extends \PHPUnit_Framework_TestCase
 {
     public function testMemcachedMockCompleteness()
     {

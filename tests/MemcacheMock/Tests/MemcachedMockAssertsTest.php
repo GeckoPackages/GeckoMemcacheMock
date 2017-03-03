@@ -19,7 +19,7 @@ use GeckoPackages\MemcacheMock\MemcachedMock;
  *
  * @internal
  */
-final class MemcachedMockAssertsTest extends PHPUnit_Framework_TestCase
+final class MemcachedMockAssertsTest extends \PHPUnit_Framework_TestCase
 {
     /**
      * @param string      $methodName
@@ -160,11 +160,13 @@ final class MemcachedMockAssertsTest extends PHPUnit_Framework_TestCase
     }
 
     /**
-     * @expectedException \GeckoPackages\MemcacheMock\MemcachedMockAssertException
-     * @expectedExceptionMessageRegExp /^assertHasNotInCache failed key "a" is not in cache.$/
+     * @requires PHPUnit 5.2
      */
     public function testAssertHasNotInCache()
     {
+        $this->expectException('\GeckoPackages\MemcacheMock\MemcachedMockAssertException');
+        $this->expectExceptionMessageRegExp('#^assertHasNotInCache failed key "a" is not in cache\.$#');
+
         $mock = new MemcachedMock();
         $mock->setThrowExceptionsOnFailure(true);
         $mock->addServer('127.0.0.1', 11211);
@@ -206,7 +208,7 @@ final class MemcachedMockAssertsTest extends PHPUnit_Framework_TestCase
 
     /**
      * @expectedException \GeckoPackages\MemcacheMock\MemcachedMockAssertException
-     * @expectedExceptionMessageRegExp /^assertKey failed key with prefix is less than 256 characters, got "_prefix_test_prefix_test_prefix_test_prefix_test_prefix_test_aaabbbcccdddeeefffggghhhhiiijjjjkkklllmmmnnnooopppqqqrrrssstttuuuvvvwwwxxxyyyzzzaaabbbcccdddeeefffggghhhhiiijjjjkkklllmmmnnnooopppqqqrrrssstttuuuvvvwwwxxxyyyzzzaaabbbcccdddeeefffggghhhhiiijjjjkkklllmmmnnnooopppqqqrrrssstttuuuvvvwwwxxxyyyzzz" \(301\).$/
+     * @expectedExceptionMessageRegExp /^assertKey failed key with prefix is less than 256 characters, got "_prefix_test_prefix_test_prefix_test_prefix_test_prefix_test_aaabbbcccdddeeefffggghhhhiiijjjjkkklllmmmnnnooopppqqqrrrssstttuuuvvvwwwxxxyyyzzzaaabbbcccdddeeefffggghhhhiiijjjjkkklllmmmnnnooopppqqqrrrssstttuuuvvvwwwxxxyyyzzzaaabbbcccdddeeefffggghhhhiiijjjjkkklllmmmnnnooopppqqqrrrssstttuuuvvvwwwxxxyyyzzz" \(301\)\.$/
      */
     public function testAssertKeyWithPrefixSet()
     {

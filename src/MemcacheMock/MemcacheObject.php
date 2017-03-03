@@ -18,7 +18,7 @@ namespace GeckoPackages\MemcacheMock;
  *
  * @internal
  */
-class MemcacheObject
+final class MemcacheObject
 {
     /**
      * @var string
