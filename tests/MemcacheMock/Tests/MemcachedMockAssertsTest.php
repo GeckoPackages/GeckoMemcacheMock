@@ -11,7 +11,6 @@
 
 use GeckoPackages\MemcacheMock\MemcachedLogger;
 use GeckoPackages\MemcacheMock\MemcachedMock;
-use GeckoPackages\MemcacheMock\MemcachedMockAssertException;
 
 /**
  * Lower level test for all asserts of the MemcachedMock.

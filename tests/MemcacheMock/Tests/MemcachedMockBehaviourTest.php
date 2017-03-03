@@ -11,7 +11,6 @@
 
 use GeckoPackages\MemcacheMock\MemcachedLogger;
 use GeckoPackages\MemcacheMock\MemcachedMock;
-use GeckoPackages\MemcacheMock\MemcachedMockAssertException;
 
 /**
  * MemcachedMock behaviour tests.
@@ -37,7 +36,7 @@ final class MemcachedMockBehaviourTest extends \PHPUnit_Framework_TestCase
      */
     public function testSetInvalidPrefixType()
     {
-        $this->expectException(\InvalidArgumentException::class);
+        $this->expectException('\InvalidArgumentException');
         $this->expectExceptionMessageRegExp('#^Prefix must be a string, got "integer"\.$#');
 
         $mock = new MemcachedMock();
@@ -49,7 +48,7 @@ final class MemcachedMockBehaviourTest extends \PHPUnit_Framework_TestCase
      */
     public function testSetInvalidPrefix()
     {
-        $this->expectException(\InvalidArgumentException::class);
+        $this->expectException('\InvalidArgumentException');
         $this->expectExceptionMessageRegExp('#^Max. length of prefix is 128, got "132"\.$#');
 
         $mock = new MemcachedMock();
@@ -61,7 +60,7 @@ final class MemcachedMockBehaviourTest extends \PHPUnit_Framework_TestCase
      */
     public function testAssertFailToException()
     {
-        $this->expectException(MemcachedMockAssertException::class);
+        $this->expectException('\GeckoPackages\MemcacheMock\MemcachedMockAssertException');
         $this->expectExceptionMessageRegExp('#^assertConnected failed is connected\.$#');
 
         $mock = new MemcachedMock();
@@ -508,7 +507,7 @@ final class MemcachedMockBehaviourTest extends \PHPUnit_Framework_TestCase
      */
     public function testOptionException()
     {
-        $this->expectException(\UnexpectedValueException::class);
+        $this->expectException('\UnexpectedValueException');
         $this->expectExceptionMessageRegExp('#^assertOption failed option is known, got "667"\.$#');
 
         $mock = $this->getMemcachedMock();
@@ -780,7 +779,7 @@ final class MemcachedMockBehaviourTest extends \PHPUnit_Framework_TestCase
      */
     public function testMissingResultErrorMessage()
     {
-        $this->expectException(\UnexpectedValueException::class);
+        $this->expectException('\UnexpectedValueException');
         $this->expectExceptionMessageRegExp('#^Unknown result failed code "555", supply an error message\.$#');
 
         $mock = new MemcachedMock();
