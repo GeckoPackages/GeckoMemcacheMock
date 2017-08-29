@@ -2,7 +2,7 @@
 
 # Memcache mock
 
-[Memcache mock](http://memcached.org/) which mimics the [Memcached package](http://php.net/manual/en/book.memcached.php) (API) as much as possible.
+[Memcache](http://memcached.org/) mock which mimics the [Memcached package](http://php.net/manual/en/book.memcached.php) (API) as much as possible.
 Its use is for test purposes of software that support interaction with Memcache using the Memcached package.
 It provides a way to perform tests without having an instance of Memcache running or even having the Memcached package available.
 The mock is written in PHP as class and is therefor not persistent beyond the execution of the script that creates it.
