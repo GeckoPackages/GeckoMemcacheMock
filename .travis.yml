@@ -18,26 +18,20 @@ matrix:
           env: MEMCACHED_PECL=memcached-2.2.0 COMPOSER_FLAGS="--prefer-stable"
         - php: 7.1
           env: MEMCACHED_PECL=memcached-2.2.0 COMPOSER_FLAGS="--dev"
-        - php: hhvm-3.9
-          sudo: required
-          dist: trusty
-          group: edge
-          env: COMPOSER_FLAGS="--prefer-stable"
-        - php: hhvm-nightly
-          sudo: required
-          dist: trusty
-          group: edge
-          env: COMPOSER_FLAGS="--dev"
-    allow_failures:
-        - php: hhvm-nightly
+        - php: 7.2
+          env: MEMCACHED_PECL=memcached-2.2.0 COMPOSER_FLAGS="--dev"
+        - php: nightly
+          env: MEMCACHED_PECL=memcached-2.2.0 COMPOSER_FLAGS="--dev"
 
 before_install:
-    - if [[ ! $TRAVIS_PHP_VERSION = hhvm* ]]; then yes "" | pecl install -f "$MEMCACHED_PECL"; fi
+    - yes "" | pecl install -f "$MEMCACHED_PECL";
 
 install:
-    - composer update $COMPOSER_FLAGS --no-interaction -v
+    - travis_retry composer update $COMPOSER_FLAGS --no-interaction -v
+    - composer info -D | sort
     - if [[ $TRAVIS_PHP_VERSION = 7.0 ]]; then curl -L https://github.com/FriendsOfPHP/PHP-CS-Fixer/releases/download/v1.13.0/php-cs-fixer.phar -o php-cs-fixer.phar; fi
 
 script:
+    - phpenv config-rm xdebug.ini || return 0
     - phpunit --verbose
     - if [[ $TRAVIS_PHP_VERSION = 7.0 ]]; then php php-cs-fixer.phar --dry-run -vvv fix; fi
