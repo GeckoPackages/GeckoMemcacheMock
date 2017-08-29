@@ -2,15 +2,15 @@
 
 # Memcache mock
 
-Memcache mock (http://memcached.org/) which mimics the [Memcached package](http://php.net/manual/en/book.memcached.php) (API) as much as possible.
-Its use is for test purposes for software that support interaction with Memcache using the Memcached package.
+[Memcache](http://memcached.org/) mock which mimics the [Memcached package](http://php.net/manual/en/book.memcached.php) (API) as much as possible.
+Its use is for test purposes of software that support interaction with Memcache using the Memcached package.
 It provides a way to perform tests without having an instance of Memcache running or even having the Memcached package available.
 The mock is written in PHP as class and is therefor not persistent beyond the execution of the script that creates it.
-Current mocking is based on PECL=memcached-2.1.0, support for later versions is currently being developed.
+Current mocking is based on `PECL=memcached ~ 2.1.0`, support for later versions is currently being developed.
 
 ### Requirements
 
-PHP 5.4 (PHP7 supported). Optional HHVM support >= 3.9.
+PHP 5.4 or up, PHP7.x supported.
 
 ### Install
 
@@ -163,3 +163,18 @@ The mock has the following additional methods that are not on the Memcached clas
 ### License
 
 The project is released under the MIT license, see the LICENSE file.
+
+### Contributions
+
+Contributions are welcome!<br/>
+Visit us on [github :octocat:](https://github.com/GeckoPackages/GeckoMemcacheMock)
+
+### Semantic Versioning
+
+This project follows [Semantic Versioning](http://semver.org/).
+
+<sub>Kindly note:
+We do not keep a backwards compatible promise on code annotated with `@internal`, the tests and tooling (such as documentation generation) of the project itself
+nor the content and/or format of exception/error messages.</sub>
+
+This project is maintained on [github :octocat:](https://github.com/GeckoPackages/GeckoMemcacheMock)
